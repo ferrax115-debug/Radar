@@ -14,7 +14,6 @@
     --green-glow: rgba(0,255,65,0.15);
     --bg: #020a03;
     --red: #ff3c3c;
-    --yellow: #ffdd00;
     --blue: #00cfff;
   }
 
@@ -33,47 +32,63 @@
 
   body::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.18) 3px, rgba(0,0,0,0.18) 4px);
-    pointer-events: none;
-    z-index: 1000;
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
+    pointer-events: none; z-index: 1000;
   }
 
   header {
-    width: 100%;
-    max-width: 480px;
+    width: 100%; max-width: 480px;
     padding: 12px 16px 8px;
     border-bottom: 1px solid var(--green-dim);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
   }
-
   .logo { font-family: 'Orbitron', monospace; font-size: 1.3rem; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 12px var(--green), 0 0 30px var(--green-dim); }
   .logo span { color: var(--green-dim); font-size: 0.7rem; letter-spacing: 2px; display: block; }
 
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: pulse-dot 1.2s infinite; }
+  .status-pill {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px;
+  }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: pdot 1.2s infinite; }
   .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+  @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
 
   main { width: 100%; max-width: 480px; padding: 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; flex: 1; }
 
-  .radar-wrap { position: relative; width: min(90vw, 360px); height: min(90vw, 360px); }
-  canvas#radar { width: 100%; height: 100%; border-radius: 50%; display: block; filter: drop-shadow(0 0 18px var(--green-dim)); }
-  .range-label { position: absolute; bottom: 10px; right: 10px; font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; }
+  .radar-wrap { position: relative; width: min(92vw, 380px); height: min(92vw, 380px); }
+  canvas#radar { width: 100%; height: 100%; border-radius: 50%; display: block; filter: drop-shadow(0 0 20px var(--green-dim)); }
+  .range-label { position: absolute; bottom: 10px; right: 12px; font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; }
 
   .controls { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-  .input-row { display: flex; gap: 8px; align-items: center; }
-  label { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; white-space: nowrap; }
+
+  /* identity row */
+  .identity-row {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--green-dark); border: 1px solid var(--green-dim);
+    border-radius: 6px; padding: 8px 10px;
+  }
+  .identity-row label { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; white-space: nowrap; }
 
   input[type="text"] {
-    background: var(--green-dark); border: 1px solid var(--green-dim); color: var(--green);
-    font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; padding: 7px 10px;
-    border-radius: 4px; outline: none; flex: 1; min-width: 0;
+    background: transparent; border: none; border-bottom: 1px solid var(--green-dim);
+    color: var(--green); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;
+    padding: 4px 6px; outline: none; flex: 1; min-width: 0;
   }
-  input:focus { border-color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+  input[type="text"]:focus { border-bottom-color: var(--green); }
 
+  /* color picker */
+  .color-picker-row {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .color-picker-row label { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; white-space: nowrap; }
+  .color-swatch {
+    width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: all .15s; flex-shrink: 0;
+  }
+  .color-swatch.selected { border-color: #fff; box-shadow: 0 0 10px currentColor; transform: scale(1.2); }
+
+  /* buttons */
   button {
     font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 2px;
     cursor: pointer; border-radius: 4px; padding: 8px 14px; transition: all .15s; white-space: nowrap;
@@ -85,28 +100,27 @@
   .btn-blue { background: #001a22; color: var(--blue); border: 1px solid #005577; }
   .btn-blue:active, .btn-blue:hover { background: var(--blue); color: var(--bg); }
 
+  .input-row { display: flex; gap: 8px; align-items: center; }
+
+  /* range slider */
   .range-row { display: flex; align-items: center; gap: 8px; width: 100%; }
   input[type=range] { -webkit-appearance: none; flex: 1; height: 4px; background: var(--green-dark); border-radius: 2px; outline: none; border: 1px solid var(--green-dim); }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); cursor: pointer; }
-  .range-val { font-size: 0.75rem; color: var(--green); min-width: 52px; text-align: right; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); cursor: pointer; }
+  .range-val { font-size: 0.75rem; color: var(--green); min-width: 56px; text-align: right; }
 
-  /* ROOM BOX */
-  .room-box {
-    width: 100%; background: var(--green-dark); border: 1px solid var(--green-dim);
-    border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
-  }
+  /* room box */
+  .room-box { width: 100%; background: var(--green-dark); border: 1px solid var(--green-dim); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
   .room-header { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; font-family: 'Orbitron', monospace; }
   .room-link { font-size: 0.7rem; color: var(--green); word-break: break-all; border: 1px dashed var(--green-dim); padding: 6px 8px; border-radius: 4px; cursor: pointer; line-height: 1.4; }
   .room-link:hover { border-color: var(--green); }
 
-  /* FRIENDS LIST */
+  /* signals list */
   .section-title { font-family: 'Orbitron', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--green-dim); border-bottom: 1px solid var(--green-dark); padding-bottom: 6px; margin-bottom: 8px; }
-  #friends-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
-  .friend-item { background: var(--green-dark); border: 1px solid var(--green-dim); border-radius: 4px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
-  .friend-name { color: var(--green); font-weight: bold; }
-  .friend-dist { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; }
-  .friend-status { width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 5px var(--red); flex-shrink: 0; }
-  .friend-status.online { background: var(--green); box-shadow: 0 0 5px var(--green); }
+  #friends-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+  .friend-item { background: var(--green-dark); border: 1px solid var(--green-dim); border-radius: 4px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; gap: 8px; }
+  .friend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .friend-name { color: var(--green); font-weight: bold; flex: 1; }
+  .friend-dist { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; white-space: nowrap; }
 
   #log { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; min-height: 16px; text-align: center; }
 
@@ -122,7 +136,7 @@
 
 <header>
   <div class="logo">RADAR 115<span>REALTIME GPS</span></div>
-  <div style="display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--green-dim);letter-spacing:1px;">
+  <div class="status-pill">
     <span id="status-txt">OFFLINE</span>
     <div class="status-dot" id="status-dot"></div>
   </div>
@@ -131,44 +145,58 @@
 <main>
 
   <div class="radar-wrap">
-    <canvas id="radar" width="720" height="720"></canvas>
+    <canvas id="radar" width="760" height="760"></canvas>
     <div class="range-label" id="range-label">500 m</div>
   </div>
 
-  <div id="log">Inserisci nome e premi START</div>
+  <div id="log">Imposta nome, colore e premi START</div>
 
   <div class="controls">
 
-    <div class="input-row">
+    <!-- IDENTITÀ -->
+    <div class="identity-row">
       <label>NOME:</label>
       <input type="text" id="my-name" placeholder="il tuo nick" maxlength="14">
-      <button class="btn-green" onclick="startRadar()">START</button>
-      <button class="btn-red" onclick="stopRadar()">■</button>
     </div>
 
+    <!-- COLORE PUNTO -->
+    <div class="identity-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+      <label>COLORE PUNTO:</label>
+      <div class="color-picker-row" id="color-picker">
+        <!-- generato da JS -->
+      </div>
+    </div>
+
+    <!-- START / STOP -->
+    <div class="input-row">
+      <button class="btn-green" style="flex:1" onclick="startRadar()">▶ START</button>
+      <button class="btn-red" onclick="stopRadar()">■ STOP</button>
+    </div>
+
+    <!-- RANGE -->
     <div class="range-row">
-      <label>RANGE:</label>
-      <input type="range" id="range-slider" min="50" max="5000" value="500" step="50" oninput="updateRange(this.value)">
+      <label style="font-size:0.65rem;color:var(--green-dim);letter-spacing:2px;white-space:nowrap;">RANGE:</label>
+      <input type="range" id="range-slider" min="1" max="3000" value="500" step="1" oninput="updateRange(this.value)">
       <span class="range-val" id="range-val">500 m</span>
     </div>
 
-    <!-- ROOM -->
+    <!-- STANZA -->
     <div class="room-box">
       <div class="room-header">// STANZA RADAR</div>
       <div class="input-row">
-        <label>ID:</label>
-        <input type="text" id="room-id" placeholder="nome stanza (es. lab115)" maxlength="20">
+        <label style="font-size:0.65rem;color:var(--green-dim);letter-spacing:2px;">ID:</label>
+        <input type="text" id="room-id" placeholder="nome stanza (es. lab115)" maxlength="20" style="background:transparent;border:none;border-bottom:1px solid var(--green-dim);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:4px 6px;outline:none;flex:1;">
         <button class="btn-blue" onclick="shareRoom()">📡 SHARE</button>
       </div>
-      <div id="room-link-box" style="display:none">
+      <div id="room-link-box" style="display:none;flex-direction:column;gap:4px;">
         <div class="room-link" id="room-link-txt" onclick="copyRoomLink()">—</div>
-        <div style="font-size:0.6rem;color:var(--green-dim);margin-top:4px">Manda questo link agli amici — appariranno sul radar automaticamente</div>
+        <div style="font-size:0.6rem;color:var(--green-dim);">Manda questo link agli amici — appariranno automaticamente</div>
       </div>
     </div>
 
   </div>
 
-  <!-- AMICI RILEVATI -->
+  <!-- SEGNALI -->
   <div style="width:100%">
     <div class="section-title">// SEGNALI RILEVATI</div>
     <div id="friends-list"><div style="font-size:0.7rem;color:var(--green-dim);text-align:center;padding:10px">Nessun segnale</div></div>
@@ -178,12 +206,11 @@
 
 <div class="copied-flash" id="copied-flash">COPIATO</div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set, onValue, remove, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
-// ── FIREBASE CONFIG ──
+// ── FIREBASE ──
 const firebaseConfig = {
   apiKey: "AIzaSyBgL6IEgrnxKkqhUWBvxMNIOlLYB4gFZk4",
   authDomain: "radar-b871d.firebaseapp.com",
@@ -194,80 +221,94 @@ const firebaseConfig = {
   appId: "1:981308908775:web:1b5bbc396849f12a166e42"
 };
 
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ── COLORI DISPONIBILI ──
+const COLORS = [
+  { id:'cyan',   hex:'#00cfff', label:'Ciano'   },
+  { id:'green',  hex:'#00ff41', label:'Verde'   },
+  { id:'yellow', hex:'#ffe000', label:'Giallo'  },
+  { id:'orange', hex:'#ff8c00', label:'Arancio' },
+  { id:'red',    hex:'#ff3c3c', label:'Rosso'   },
+  { id:'pink',   hex:'#ff5fdf', label:'Rosa'    },
+  { id:'violet', hex:'#b066ff', label:'Viola'   },
+  { id:'white',  hex:'#ffffff', label:'Bianco'  },
+];
+
 // ── STATE ──
 const state = {
   running: false,
-  myPos: null,
-  myName: 'ME',
-  myId: null,
-  range: 500,
+  myPos:   null,
+  myName:  'ME',
+  myColor: '#00cfff',
+  myId:    'u_' + Math.random().toString(36).substr(2, 9),
+  range:   500,
   watchId: null,
   scanAngle: 0,
-  animId: null,
-  room: null,
-  peers: {},        // { id: {name, lat, lon, ts} }
-  db: null,
+  animId:  null,
+  room:    'default',
+  peers:   {},
   peerRef: null,
-  unsubscribe: null
+  unsubscribe: null,
+  pushTimer: null,
 };
 
 // ── CANVAS ──
 const canvas = document.getElementById('radar');
-const ctx = canvas.getContext('2d');
+const ctx    = canvas.getContext('2d');
 const W = canvas.width, H = canvas.height;
 const CX = W/2, CY = H/2;
-const R = W/2 - 24;
-const GREEN = '#00ff41', GREEN_DIM = '#00aa2a', GREEN_DARK = '#002208', BG = '#010901', BLUE = '#00cfff';
+const R  = W/2 - 28;
+
+// ── BUILD COLOR PICKER ──
+function buildColorPicker() {
+  const wrap = document.getElementById('color-picker');
+  wrap.innerHTML = '';
+  COLORS.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (c.hex === state.myColor ? ' selected' : '');
+    sw.style.background = c.hex;
+    sw.style.boxShadow  = c.hex === state.myColor ? `0 0 10px ${c.hex}` : 'none';
+    sw.title = c.label;
+    sw.onclick = () => {
+      state.myColor = c.hex;
+      buildColorPicker();
+      if (state.running) pushMyPosition();
+    };
+    wrap.appendChild(sw);
+  });
+}
 
 // ── INIT ──
 function init() {
   try {
-    const n = localStorage.getItem('r115_name');
-    if (n) { state.myName = n; document.getElementById('my-name').value = n; }
-    const r = localStorage.getItem('r115_room');
-    if (r) document.getElementById('room-id').value = r;
+    const n = localStorage.getItem('r115_name');  if (n) { state.myName = n; document.getElementById('my-name').value = n; }
+    const c = localStorage.getItem('r115_color'); if (c) state.myColor = c;
+    const r = localStorage.getItem('r115_room');  if (r) document.getElementById('room-id').value = r;
   } catch(e){}
 
-  // check URL params
   const p = new URLSearchParams(window.location.search);
-  const roomParam = p.get('room');
-  if (roomParam) {
-    document.getElementById('room-id').value = roomParam;
-    setLog('📡 Stanza: ' + roomParam + ' — premi START');
-  }
+  const rp = p.get('room');
+  if (rp) { document.getElementById('room-id').value = rp; setLog('📡 Stanza: ' + rp + ' — premi START'); }
 
-  state.myId = 'u_' + Math.random().toString(36).substr(2, 9);
+  buildColorPicker();
   animate();
-}
-
-// ── FIREBASE INIT ──
-function initFirebase() {
-  if (state.db) return true;
-  try {
-    // Usa il progetto Firebase dell'utente se configurato
-    const userConfig = window.FIREBASE_CONFIG || null;
-    const cfg = userConfig || firebaseConfig;
-    const app = initializeApp(cfg, 'radar115_' + Date.now());
-    state.db = getDatabase(app);
-    return true;
-  } catch(e) {
-    setLog('⚠ Firebase non configurato — modalità locale');
-    return false;
-  }
 }
 
 // ── START ──
 window.startRadar = function() {
-  state.myName = document.getElementById('my-name').value.trim() || 'ME';
-  try { localStorage.setItem('r115_name', state.myName); } catch(e){}
+  state.myName  = document.getElementById('my-name').value.trim() || 'ME';
+  state.room    = document.getElementById('room-id').value.trim() || 'default';
+  document.getElementById('room-id').value = state.room;
 
-  const roomId = document.getElementById('room-id').value.trim() || 'default';
-  document.getElementById('room-id').value = roomId;
-  state.room = roomId;
-  try { localStorage.setItem('r115_room', roomId); } catch(e){}
+  try {
+    localStorage.setItem('r115_name',  state.myName);
+    localStorage.setItem('r115_color', state.myColor);
+    localStorage.setItem('r115_room',  state.room);
+  } catch(e){}
 
   if (!navigator.geolocation) { setLog('❌ Geolocation non supportata'); return; }
-
   setLog('🛰 Acquisizione GPS...');
 
   const opts = { enableHighAccuracy: true, timeout: 15000, maximumAge: 4000 };
@@ -286,9 +327,9 @@ window.startRadar = function() {
       state.running = false;
       document.getElementById('status-dot').classList.remove('active');
       document.getElementById('status-txt').textContent = 'OFFLINE';
-      if (err.code === 1) setLog('⛔ Permesso GPS negato — vai alle impostazioni browser');
+      if (err.code === 1)      setLog('⛔ Permesso GPS negato');
       else if (err.code === 2) setLog('❌ Posizione non disponibile');
-      else setLog('⏱ Timeout GPS');
+      else                     setLog('⏱ Timeout GPS');
     },
     opts
   );
@@ -297,60 +338,58 @@ window.startRadar = function() {
 // ── STOP ──
 window.stopRadar = function() {
   if (state.watchId !== null) { navigator.geolocation.clearWatch(state.watchId); state.watchId = null; }
-  if (state.peerRef && state.db) {
-    try { remove(state.peerRef); } catch(e){}
-  }
+  if (state.peerRef) try { remove(state.peerRef); } catch(e){}
   if (state.unsubscribe) { state.unsubscribe(); state.unsubscribe = null; }
+  if (state.pushTimer) { clearTimeout(state.pushTimer); state.pushTimer = null; }
   state.running = false;
-  state.peers = {};
+  state.peers   = {};
   document.getElementById('status-dot').classList.remove('active');
   document.getElementById('status-txt').textContent = 'OFFLINE';
   setLog('■ Radar spento');
+  renderFriendsList();
 };
 
-// ── PUSH MY POSITION to Firebase ──
+// ── PUSH POSITION ──
 function pushMyPosition() {
-  if (!state.myPos || !state.db) {
-    initFirebase();
-    if (!state.db) return;
-  }
+  if (!state.myPos || !state.running) return;
   const path = `rooms/${state.room}/users/${state.myId}`;
-  state.peerRef = ref(state.db, path);
+  state.peerRef = ref(db, path);
   set(state.peerRef, {
-    name: state.myName,
-    lat: state.myPos.lat,
-    lon: state.myPos.lon,
-    ts: Date.now()
+    name:  state.myName,
+    color: state.myColor,
+    lat:   state.myPos.lat,
+    lon:   state.myPos.lon,
+    ts:    Date.now()
   });
-  // Aggiorna ogni 5s
-  setTimeout(() => { if (state.running && state.myPos) pushMyPosition(); }, 5000);
+  if (state.pushTimer) clearTimeout(state.pushTimer);
+  state.pushTimer = setTimeout(pushMyPosition, 5000);
 }
 
 // ── LISTEN PEERS ──
 function listenPeers() {
-  if (!state.db) { initFirebase(); if (!state.db) return; }
-  if (state.unsubscribe) return; // già in ascolto
-  const roomRef = ref(state.db, `rooms/${state.room}/users`);
+  if (state.unsubscribe) return;
+  const roomRef = ref(db, `rooms/${state.room}/users`);
   state.unsubscribe = onValue(roomRef, snapshot => {
     const data = snapshot.val() || {};
     state.peers = {};
     const now = Date.now();
     Object.entries(data).forEach(([id, u]) => {
-      if (id === state.myId) return; // skip me
-      if (now - u.ts > 30000) return; // skip vecchi >30s
+      if (id === state.myId) return;
+      if (now - u.ts > 30000) return;
       state.peers[id] = u;
     });
     renderFriendsList();
   });
 }
 
-// ── SHARE ROOM ──
+// ── SHARE ──
 window.shareRoom = function() {
   const roomId = document.getElementById('room-id').value.trim() || 'default';
   state.room = roomId;
-  const url = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
+  const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(roomId)}`;
+  const box = document.getElementById('room-link-box');
   document.getElementById('room-link-txt').textContent = url;
-  document.getElementById('room-link-box').style.display = 'block';
+  box.style.display = 'flex';
   if (navigator.share) navigator.share({ title: 'Radar 115', url }).catch(()=>{});
 };
 
@@ -364,104 +403,169 @@ window.copyRoomLink = function() {
   });
 };
 
-// ── RADAR DRAW ──
+window.updateRange = function(val) {
+  state.range = parseInt(val);
+  document.getElementById('range-val').textContent   = formatDist(state.range);
+  document.getElementById('range-label').textContent = formatDist(state.range);
+};
+
+// ── DRAW ──
 function drawRadar() {
   ctx.clearRect(0, 0, W, H);
 
   // BG
-  ctx.save();
-  ctx.beginPath(); ctx.arc(CX, CY, R+10, 0, Math.PI*2); ctx.clip();
-  ctx.fillStyle = BG; ctx.fillRect(0,0,W,H);
-  ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.arc(CX,CY,R+14,0,Math.PI*2); ctx.clip();
+  ctx.fillStyle = '#010901'; ctx.fillRect(0,0,W,H); ctx.restore();
 
   // Rings
-  ctx.strokeStyle = GREEN_DARK; ctx.lineWidth = 2;
-  [0.25, 0.5, 0.75, 1].forEach(f => { ctx.beginPath(); ctx.arc(CX,CY,R*f,0,Math.PI*2); ctx.stroke(); });
+  ctx.strokeStyle = '#002208'; ctx.lineWidth = 2;
+  [0.25,0.5,0.75,1].forEach(f => { ctx.beginPath(); ctx.arc(CX,CY,R*f,0,Math.PI*2); ctx.stroke(); });
 
   // Crosshair
-  ctx.strokeStyle = GREEN_DARK; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(CX-R, CY); ctx.lineTo(CX+R, CY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(CX, CY-R); ctx.lineTo(CX, CY+R); ctx.stroke();
+  ctx.strokeStyle = '#002208'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(CX-R,CY); ctx.lineTo(CX+R,CY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX,CY-R); ctx.lineTo(CX,CY+R); ctx.stroke();
 
   // Sweep
   if (state.running) {
-    for (let i = 0; i < 30; i++) {
-      const a = state.scanAngle - (Math.PI*0.6*i/30);
+    for (let i = 0; i < 32; i++) {
+      const a = state.scanAngle - (Math.PI*0.65*i/32);
       ctx.save(); ctx.beginPath(); ctx.moveTo(CX,CY);
-      ctx.arc(CX, CY, R, a, a + Math.PI*0.6/30);
-      ctx.lineTo(CX,CY); ctx.fillStyle = `rgba(0,255,65,${0.12*(1-i/30)})`; ctx.fill(); ctx.restore();
+      ctx.arc(CX,CY,R,a,a+Math.PI*0.65/32);
+      ctx.lineTo(CX,CY); ctx.fillStyle=`rgba(0,255,65,${0.13*(1-i/32)})`; ctx.fill(); ctx.restore();
     }
-    ctx.save(); ctx.strokeStyle = GREEN; ctx.lineWidth = 2.5;
-    ctx.shadowBlur = 12; ctx.shadowColor = GREEN;
+    ctx.save(); ctx.strokeStyle='#00ff41'; ctx.lineWidth=2.5; ctx.shadowBlur=14; ctx.shadowColor='#00ff41';
     ctx.beginPath(); ctx.moveTo(CX,CY);
     ctx.lineTo(CX+Math.cos(state.scanAngle)*R, CY+Math.sin(state.scanAngle)*R);
     ctx.stroke(); ctx.restore();
   }
 
-  // Border
-  ctx.save(); ctx.strokeStyle = GREEN; ctx.lineWidth = 3;
-  ctx.shadowBlur = 20; ctx.shadowColor = GREEN;
+  // Outer border
+  ctx.save(); ctx.strokeStyle='#00ff41'; ctx.lineWidth=3; ctx.shadowBlur=22; ctx.shadowColor='#00ff41';
   ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2); ctx.stroke(); ctx.restore();
 
-  // Clip circle
+  // Clip to circle
   ctx.save(); ctx.beginPath(); ctx.arc(CX,CY,R-2,0,Math.PI*2); ctx.clip();
 
-  // Peers
+  // ── Draw peers ──
   Object.values(state.peers).forEach(p => {
     if (!state.myPos) return;
-    const {x, y} = latLonToXY(p.lat, p.lon);
-    const dist = haversine(state.myPos.lat, state.myPos.lon, p.lat, p.lon);
+    const {x,y} = latLonToXY(p.lat, p.lon);
+    const dist   = haversine(state.myPos.lat, state.myPos.lon, p.lat, p.lon);
+    const col    = p.color || '#00cfff';
+    const inRange = dist <= state.range;
+    const alpha  = inRange ? 1 : 0.3;
 
-    // Dot
-    ctx.save(); ctx.beginPath(); ctx.arc(x,y,11,0,Math.PI*2);
-    ctx.fillStyle = dist <= state.range ? BLUE : 'rgba(0,207,255,0.25)';
-    ctx.shadowBlur = 18; ctx.shadowColor = BLUE; ctx.fill(); ctx.restore();
+    // Shadow glow
+    ctx.save();
+    ctx.shadowBlur  = 22;
+    ctx.shadowColor = col;
+
+    // Dot (grande, 16px)
+    ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2);
+    ctx.fillStyle = col.replace(')', `,${alpha})`).replace('rgb','rgba').replace('#', 'rgba(').replace(/[0-9a-f]{2}/gi, h => parseInt(h,16)+',').replace(/,\)$/,`,${alpha})`);
+    // Simpler: use globalAlpha
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = inRange ? 1 : 0.3;
+    ctx.shadowBlur  = 24; ctx.shadowColor = col;
+    ctx.beginPath(); ctx.arc(x,y,16,0,Math.PI*2);
+    ctx.fillStyle = col; ctx.fill();
+    ctx.restore();
 
     // Ping ring
-    if (dist <= state.range) {
+    if (inRange) {
       const ph = (state.scanAngle/(Math.PI*2))%1;
-      ctx.save(); ctx.beginPath(); ctx.arc(x,y,11+22*ph,0,Math.PI*2);
-      ctx.strokeStyle = `rgba(0,207,255,${1-ph})`; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.globalAlpha = 1-ph;
+      ctx.beginPath(); ctx.arc(x,y,16+28*ph,0,Math.PI*2);
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
     }
 
-    // Label
+    // Nome sopra il punto
     ctx.save();
-    ctx.font = 'bold 22px Share Tech Mono, monospace'; ctx.fillStyle = BLUE;
-    ctx.shadowBlur = 8; ctx.shadowColor = BLUE;
-    ctx.fillText(p.name, x+14, y-6);
-    ctx.font = '18px Share Tech Mono, monospace'; ctx.fillStyle = 'rgba(0,207,255,0.7)';
-    ctx.fillText(formatDist(dist), x+14, y+14);
+    ctx.globalAlpha = inRange ? 1 : 0.4;
+    ctx.font        = 'bold 26px Share Tech Mono, monospace';
+    ctx.fillStyle   = col;
+    ctx.shadowBlur  = 10; ctx.shadowColor = col;
+    ctx.textAlign   = 'center';
+    ctx.fillText(p.name, x, y - 22);
+    // Distanza sotto il punto
+    ctx.font      = '20px Share Tech Mono, monospace';
+    ctx.fillStyle = col;
+    ctx.globalAlpha *= 0.75;
+    ctx.fillText(formatDist(dist), x, y + 34);
     ctx.restore();
   });
 
-  // Me
-  ctx.save(); ctx.beginPath(); ctx.arc(CX,CY,11,0,Math.PI*2);
-  ctx.fillStyle = GREEN; ctx.shadowBlur = 22; ctx.shadowColor = GREEN; ctx.fill(); ctx.restore();
-  ctx.save(); ctx.font = 'bold 22px Share Tech Mono, monospace'; ctx.fillStyle = GREEN;
-  ctx.shadowBlur = 10; ctx.shadowColor = GREEN; ctx.fillText(state.myName, CX+14, CY-6); ctx.restore();
+  // ── Draw ME ──
+  ctx.save();
+  ctx.shadowBlur=28; ctx.shadowColor='#00ff41';
+  ctx.beginPath(); ctx.arc(CX,CY,18,0,Math.PI*2);
+  ctx.fillStyle='#00ff41'; ctx.fill();
+  ctx.restore();
+
+  // Cerchio esterno ME
+  ctx.save();
+  ctx.beginPath(); ctx.arc(CX,CY,24,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,255,65,0.4)'; ctx.lineWidth=2; ctx.stroke();
+  ctx.restore();
+
+  // Nome ME sopra
+  ctx.save();
+  ctx.font='bold 28px Share Tech Mono, monospace'; ctx.fillStyle='#00ff41';
+  ctx.shadowBlur=12; ctx.shadowColor='#00ff41'; ctx.textAlign='center';
+  ctx.fillText(state.myName, CX, CY-28);
+  ctx.restore();
 
   ctx.restore(); // unclip
 
   // Corners
   drawCorners();
 
-  // Cardinal
-  ctx.font = 'bold 22px Orbitron, monospace'; ctx.fillStyle = GREEN_DIM;
-  ctx.textAlign = 'center'; ctx.fillText('N', CX, CY-R+28);
-  ctx.fillText('S', CX, CY+R-10);
-  ctx.textAlign = 'left'; ctx.fillText('E', CX+R-28, CY+8);
-  ctx.textAlign = 'right'; ctx.fillText('W', CX-R+28, CY+8);
+  // Cardinals
+  ctx.font='bold 24px Orbitron, monospace'; ctx.fillStyle='#00aa2a';
+  ctx.textAlign='center';
+  ctx.fillText('N', CX, CY-R+30);
+  ctx.fillText('S', CX, CY+R-12);
+  ctx.textAlign='left';  ctx.fillText('E', CX+R-30, CY+9);
+  ctx.textAlign='right'; ctx.fillText('W', CX-R+30, CY+9);
 }
 
 function drawCorners() {
-  const s = 36; ctx.strokeStyle = GREEN; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.moveTo(14,14+s); ctx.lineTo(14,14); ctx.lineTo(14+s,14); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W-14-s,14); ctx.lineTo(W-14,14); ctx.lineTo(W-14,14+s); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(14,H-14-s); ctx.lineTo(14,H-14); ctx.lineTo(14+s,H-14); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W-14-s,H-14); ctx.lineTo(W-14,H-14); ctx.lineTo(W-14,H-14-s); ctx.stroke();
+  const s=40; ctx.strokeStyle='#00ff41'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(16,16+s); ctx.lineTo(16,16); ctx.lineTo(16+s,16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W-16-s,16); ctx.lineTo(W-16,16); ctx.lineTo(W-16,16+s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(16,H-16-s); ctx.lineTo(16,H-16); ctx.lineTo(16+s,H-16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W-16-s,H-16); ctx.lineTo(W-16,H-16); ctx.lineTo(W-16,H-16-s); ctx.stroke();
 }
 
-// ── HELPERS ──
+// ── ANIMATE ──
+function animate() {
+  if (state.running) state.scanAngle = (state.scanAngle+0.025)%(Math.PI*2);
+  drawRadar();
+  state.animId = requestAnimationFrame(animate);
+}
+
+// ── FRIENDS LIST ──
+function renderFriendsList() {
+  const el = document.getElementById('friends-list');
+  const peers = Object.values(state.peers);
+  if (!peers.length) {
+    el.innerHTML = '<div style="font-size:0.7rem;color:var(--green-dim);text-align:center;padding:10px">Nessun segnale</div>';
+    return;
+  }
+  el.innerHTML = peers.map(p => {
+    const dist = state.myPos ? haversine(state.myPos.lat,state.myPos.lon,p.lat,p.lon) : null;
+    const col  = p.color || '#00cfff';
+    return `<div class="friend-item">
+      <div class="friend-dot" style="background:${col};box-shadow:0 0 8px ${col}"></div>
+      <span class="friend-name" style="color:${col}">${p.name}</span>
+      <span class="friend-dist">${dist!==null ? formatDist(dist) : '?'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── GEO MATH ──
 function haversine(lat1,lon1,lat2,lon2) {
   const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -471,76 +575,22 @@ function haversine(lat1,lon1,lat2,lon2) {
 function latLonToXY(lat,lon) {
   if (!state.myPos) return {x:CX,y:CY};
   const dy_m = -(lat-state.myPos.lat)*111320;
-  const dx_m = (lon-state.myPos.lon)*111320*Math.cos(state.myPos.lat*Math.PI/180);
+  const dx_m  = (lon-state.myPos.lon)*111320*Math.cos(state.myPos.lat*Math.PI/180);
   const scale = R/state.range;
   return { x: Math.round(CX+dx_m*scale), y: Math.round(CY+dy_m*scale) };
 }
 
 function formatDist(m) { return m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m'; }
+function setLog(msg)    { document.getElementById('log').textContent = msg; }
+function showCopied()   { const e=document.getElementById('copied-flash'); e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),1200); }
 
-function setLog(msg) { document.getElementById('log').textContent = msg; }
-
-function showCopied() {
-  const el = document.getElementById('copied-flash');
-  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200);
-}
-
-function renderFriendsList() {
-  const el = document.getElementById('friends-list');
-  const peers = Object.values(state.peers);
-  if (!peers.length) { el.innerHTML = '<div style="font-size:0.7rem;color:var(--green-dim);text-align:center;padding:10px">Nessun segnale</div>'; return; }
-  el.innerHTML = peers.map(p => {
-    const dist = state.myPos ? haversine(state.myPos.lat,state.myPos.lon,p.lat,p.lon) : null;
-    return `<div class="friend-item">
-      <div class="friend-status online"></div>
-      <span class="friend-name">${p.name}</span>
-      <span class="friend-dist">${dist!==null?formatDist(dist):'?'}</span>
-    </div>`;
-  }).join('');
-}
-
-window.updateRange = function(val) {
-  state.range = parseInt(val);
-  document.getElementById('range-val').textContent = formatDist(state.range);
-  document.getElementById('range-label').textContent = formatDist(state.range);
-};
-
-function animate() {
-  if (state.running) state.scanAngle = (state.scanAngle+0.025)%(Math.PI*2);
-  drawRadar();
-  state.animId = requestAnimationFrame(animate);
-}
-
-// cleanup on unload
+// cleanup
 window.addEventListener('beforeunload', () => {
-  if (state.peerRef && state.db) { try { remove(state.peerRef); } catch(e){} }
+  if (state.peerRef) try { remove(state.peerRef); } catch(e){}
 });
 
 init();
 </script>
-
-<!-- ISTRUZIONI FIREBASE -->
-<script>
-// ═══════════════════════════════════════════════════════════════════
-// PER USARE IL RADAR IN REALTIME hai bisogno di un Firebase gratuito.
-// 1. Vai su https://console.firebase.google.com
-// 2. Crea un progetto → aggiungi un'app Web
-// 3. Copia la tua firebaseConfig qui sotto:
-//
-// window.FIREBASE_CONFIG = {
-//   apiKey: "LA-TUA-API-KEY",
-//   authDomain: "il-tuo-progetto.firebaseapp.com",
-//   databaseURL: "https://il-tuo-progetto-default-rtdb.europe-west1.firebasedatabase.app",
-//   projectId: "il-tuo-progetto",
-//   storageBucket: "il-tuo-progetto.appspot.com",
-//   messagingSenderId: "000000000000",
-//   appId: "1:000:web:000"
-// };
-//
-// 4. In Firebase → Realtime Database → Regole, metti:
-//    { "rules": { ".read": true, ".write": true } }
-// ═══════════════════════════════════════════════════════════════════
-</script>
-
 </body>
 </html>
+ 
