@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>RADAR 115</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --green: #00ff41;
+    --green-dim: #00aa2a;
+    --green-dark: #003311;
+    --green-glow: rgba(0,255,65,0.15);
+    --bg: #020a03;
+    --scan: rgba(0,255,65,0.08);
+    --red: #ff3c3c;
+    --yellow: #ffdd00;
+    --blue: #00cfff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* CRT scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.18) 3px,
+      rgba(0,0,0,0.18) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* flicker */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0,255,65,0.015);
+    animation: flicker 4s infinite;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  @keyframes flicker {
+    0%,100%{opacity:1} 50%{opacity:0.92} 60%{opacity:0.97} 80%{opacity:0.9}
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    width: 100%;
+    max-width: 480px;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid var(--green-dim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-shadow: 0 0 12px var(--green), 0 0 30px var(--green-dim);
+  }
+
+  .logo span { color: var(--green-dim); font-size: 0.75rem; letter-spacing:2px; display:block; }
+
+  .status-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+    animation: pulse-dot 1.2s infinite;
+  }
+  .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+  @keyframes pulse-dot {
+    0%,100%{opacity:1; transform:scale(1)}
+    50%{opacity:0.4; transform:scale(0.8)}
+  }
+
+  /* ─── MAIN CONTAINER ─── */
+  main {
+    width: 100%;
+    max-width: 480px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+  }
+
+  /* ─── RADAR CANVAS ─── */
+  .radar-wrap {
+    position: relative;
+    width: min(90vw, 380px);
+    height: min(90vw, 380px);
+  }
+
+  canvas#radar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: block;
+    filter: drop-shadow(0 0 18px var(--green-dim));
+  }
+
+  /* range label */
+  .range-label {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+  }
+
+  /* ─── CONTROLS ─── */
+  .controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  label {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  input[type="text"], input[type="number"] {
+    background: var(--green-dark);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    padding: 7px 10px;
+    border-radius: 4px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+  }
+
+  input:focus { border-color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+
+  btn, button {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid var(--green-dim);
+    padding: 8px 14px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+
+  .btn-green {
+    background: var(--green-dark);
+    color: var(--green);
+  }
+  .btn-green:active, .btn-green:hover {
+    background: var(--green);
+    color: var(--bg);
+    box-shadow: 0 0 12px var(--green);
+  }
+
+  .btn-red {
+    background: #1a0000;
+    color: var(--red);
+    border-color: #882222;
+  }
+  .btn-red:active, .btn-red:hover {
+    background: var(--red);
+    color: var(--bg);
+  }
+
+  .btn-blue {
+    background: #001a22;
+    color: var(--blue);
+    border-color: #005577;
+  }
+  .btn-blue:active, .btn-blue:hover {
+    background: var(--blue);
+    color: var(--bg);
+  }
+
+  /* ─── RANGE SLIDER ─── */
+  .range-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    background: var(--green-dark);
+    border-radius: 2px;
+    outline: none;
+    border: 1px solid var(--green-dim);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    cursor: pointer;
+  }
+
+  .range-val {
+    font-size: 0.75rem;
+    color: var(--green);
+    min-width: 52px;
+    text-align: right;
+  }
+
+  /* ─── SHARE LINK ─── */
+  .share-box {
+    width: 100%;
+    background: var(--green-dark);
+    border: 1px solid var(--green-dim);
+    border-radius: 6px;
+    padding: 10px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .share-box.visible { display: flex; }
+
+  .share-url {
+    font-size: 0.7rem;
+    color: var(--green-dim);
+    word-break: break-all;
+    line-height: 1.4;
+    cursor: pointer;
+    border: 1px dashed var(--green-dim);
+    padding: 6px 8px;
+    border-radius: 4px;
+  }
+  .share-url:hover { color: var(--green); border-color: var(--green); }
+
+  .share-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+  }
+
+  /* ─── FRIENDS LIST ─── */
+  .friends-section {
+    width: 100%;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    border-bottom: 1px solid var(--green-dark);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+
+  .friend-add-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  #friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  .friend-item {
+    background: var(--green-dark);
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all .1s;
+  }
+  .friend-item:hover { border-color: var(--green); }
+  .friend-item.active { border-color: var(--green); background: rgba(0,255,65,0.07); }
+
+  .friend-name { color: var(--green); font-weight: bold; }
+
+  .friend-dist {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+  }
+
+  .friend-status {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 5px var(--red);
+    flex-shrink: 0;
+  }
+  .friend-status.online { background: var(--green); box-shadow: 0 0 5px var(--green); }
+
+  .friend-remove {
+    background: none;
+    border: none;
+    color: var(--red);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  /* ─── LOG ─── */
+  #log {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+    min-height: 16px;
+    text-align: center;
+  }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #060e07;
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 360px;
+    box-shadow: 0 0 30px var(--green-glow);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .modal h2 {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green);
+  }
+
+  .modal p {
+    font-size: 0.75rem;
+    color: var(--green-dim);
+    line-height: 1.5;
+  }
+
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--green-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 2px; }
+
+  .copied-flash {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: var(--green);
+    color: var(--bg);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    padding: 12px 24px;
+    border-radius: 6px;
+    z-index: 900;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .copied-flash.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">RADAR<span>LAB115 // GPS</span></div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:0.65rem;color:var(--green-dim);letter-spacing:1px;">
+    <span id="status-txt">OFFLINE</span>
+    <div class="status-dot" id="status-dot"></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- RADAR -->
+  <div class="radar-wrap">
+    <canvas id="radar" width="760" height="760"></canvas>
+    <div class="range-label" id="range-label">--- m</div>
+  </div>
+
+  <!-- LOG -->
+  <div id="log">Premi START per attivare GPS</div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+
+    <!-- Nome + Start -->
+    <div class="input-row">
+      <label>NAME:</label>
+      <input type="text" id="my-name" placeholder="il tuo nick" maxlength="16" value="">
+      <button class="btn-green" id="btn-start" onclick="startRadar()">START</button>
+    </div>
+
+    <!-- Range -->
+    <div class="range-row">
+      <label>RANGE:</label>
+      <input type="range" id="range-slider" min="50" max="5000" value="500" step="50" oninput="updateRange(this.value)">
+      <span class="range-val" id="range-val">500 m</span>
+    </div>
+
+    <!-- Share link -->
+    <div style="display:flex;gap:8px;">
+      <button class="btn-blue" onclick="shareLocation()" id="btn-share" style="flex:1">📡 CONDIVIDI</button>
+      <button class="btn-red" onclick="stopRadar()" id="btn-stop">■ STOP</button>
+    </div>
+
+    <div class="share-box" id="share-box">
+      <div class="share-header">
+        <span>LINK POSIZIONE</span>
+        <button class="btn-blue" onclick="copyLink()" style="font-size:0.65rem;padding:4px 8px;">COPIA</button>
+      </div>
+      <div class="share-url" id="share-url" onclick="copyLink()">—</div>
+    </div>
+
+  </div>
+
+  <!-- AMICI -->
+  <div class="friends-section">
+    <div class="section-title">// AMICI SUL RADAR</div>
+
+    <div class="friend-add-row">
+      <input type="text" id="friend-name" placeholder="nome amico" maxlength="14" style="flex:1.2">
+      <input type="text" id="friend-link" placeholder="link posizione amico" style="flex:2">
+      <button class="btn-green" onclick="addFriend()" style="padding:8px 10px">+</button>
+    </div>
+
+    <div id="friends-list"></div>
+  </div>
+
+</main>
+
+<!-- Modal GPS denied -->
+<div class="modal-overlay" id="modal-gps">
+  <div class="modal">
+    <h2>⚠ GPS BLOCCATO</h2>
+    <p>
+      Il browser ha negato l'accesso alla posizione.<br><br>
+      Su <b>iOS Safari</b>: Impostazioni → Safari → Posizione → Consenti<br>
+      Su <b>Android Chrome</b>: tap sull'icono 🔒 nella barra indirizzi → Posizione → Consenti<br><br>
+      Se usi un file locale (<b>file://</b>), la geolocalizzazione non funziona: carica il file su un server HTTPS (anche <b>ngrok</b> o <b>GitHub Pages</b>).
+    </p>
+    <div class="modal-btns">
+      <button class="btn-green" onclick="closeModal('modal-gps')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Copied flash -->
+<div class="copied-flash" id="copied-flash">COPIATO</div>
+
+<script>
+// ──────────────────────────────────────────────
+// STATE
+// ──────────────────────────────────────────────
+const state = {
+  running: false,
+  myPos: null,       // {lat, lon}
+  myName: 'ME',
+  range: 500,        // meters
+  watchId: null,
+  friends: [],       // [{name, lat, lon, dist, id, active}]
+  scanAngle: 0,
+  animId: null
+};
+
+// Load from localStorage
+function loadState() {
+  try {
+    const n = localStorage.getItem('radar115_name');
+    if (n) { state.myName = n; document.getElementById('my-name').value = n; }
+    const f = localStorage.getItem('radar115_friends');
+    if (f) state.friends = JSON.parse(f);
+  } catch(e){}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('radar115_name', state.myName);
+    localStorage.setItem('radar115_friends', JSON.stringify(state.friends));
+  } catch(e){}
+}
+
+// ──────────────────────────────────────────────
+// RADAR CANVAS
+// ──────────────────────────────────────────────
+const canvas = document.getElementById('radar');
+const ctx = canvas.getContext('2d');
+const W = canvas.width;
+const H = canvas.height;
+const CX = W / 2;
+const CY = H / 2;
+const R = W / 2 - 20;
+
+const GREEN      = '#00ff41';
+const GREEN_DIM  = '#00aa2a';
+const GREEN_DARK = '#002208';
+const SCAN_COLOR = 'rgba(0,255,65,0.18)';
+const BG_COLOR   = '#010901';
+
+function drawRadar() {
+  ctx.clearRect(0, 0, W, H);
+
+  // BG circle
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(CX, CY, R + 10, 0, Math.PI*2);
+  ctx.clip();
+  ctx.fillStyle = BG_COLOR;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+
+  // ── Rings ──
+  ctx.strokeStyle = GREEN_DARK;
+  ctx.lineWidth = 2;
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    ctx.beginPath();
+    ctx.arc(CX, CY, R * f, 0, Math.PI*2);
+    ctx.stroke();
+  });
+
+  // ── Crosshair ──
+  ctx.strokeStyle = GREEN_DARK;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(CX - R, CY); ctx.lineTo(CX + R, CY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX, CY - R); ctx.lineTo(CX, CY + R); ctx.stroke();
+
+  // Diagonal lines (45°)
+  ctx.setLineDash([8, 16]);
+  ctx.beginPath(); ctx.moveTo(CX - R*0.7, CY - R*0.7); ctx.lineTo(CX + R*0.7, CY + R*0.7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CX + R*0.7, CY - R*0.7); ctx.lineTo(CX - R*0.7, CY + R*0.7); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── Scan sweep ──
+  if (state.running) {
+    // Trailing glow
+    const sweepGrad = ctx.createConicalGradient ? null : null;
+    // Manual sweep trail
+    const trailLen = Math.PI * 0.6;
+    for (let i = 0; i < 30; i++) {
+      const a = state.scanAngle - (trailLen * i / 30);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(CX, CY);
+      ctx.arc(CX, CY, R, a, a + trailLen/30);
+      ctx.lineTo(CX, CY);
+      ctx.fillStyle = `rgba(0,255,65,${0.12 * (1 - i/30)})`;
+      ctx.fill();
+      ctx.restore();
+    }
+    // Sweep line
+    ctx.save();
+    ctx.strokeStyle = GREEN;
+    ctx.lineWidth = 2.5;
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = GREEN;
+    ctx.beginPath();
+    ctx.moveTo(CX, CY);
+    ctx.lineTo(CX + Math.cos(state.scanAngle) * R, CY + Math.sin(state.scanAngle) * R);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── Outer border ──
+  ctx.save();
+  ctx.strokeStyle = GREEN;
+  ctx.lineWidth = 3;
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = GREEN;
+  ctx.beginPath();
+  ctx.arc(CX, CY, R, 0, Math.PI*2);
+  ctx.stroke();
+  ctx.restore();
+
+  // ── Clip to circle ──
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(CX, CY, R - 2, 0, Math.PI*2);
+  ctx.clip();
+
+  // ── Friends dots ──
+  state.friends.forEach(f => {
+    if (!f.lat || !f.lon || !state.myPos) return;
+    const {x, y} = latLonToXY(f.lat, f.lon);
+    const dist = haversine(state.myPos.lat, state.myPos.lon, f.lat, f.lon);
+    f.dist = dist;
+
+    // Dot
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI*2);
+    ctx.fillStyle = dist <= state.range ? '#00cfff' : 'rgba(0,207,255,0.3)';
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = '#00cfff';
+    ctx.fill();
+    ctx.restore();
+
+    // Ping animation
+    const phase = (state.scanAngle / (Math.PI*2)) % 1;
+    if (dist <= state.range) {
+      ctx.save();
+      ctx.beginPath();
+      const pingR = 10 + 20 * phase;
+      ctx.arc(x, y, pingR, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(0,207,255,${1 - phase})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Name label
+    ctx.save();
+    ctx.font = 'bold 20px Share Tech Mono, monospace';
+    ctx.fillStyle = '#00cfff';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#00cfff';
+    ctx.fillText(f.name, x + 13, y - 6);
+    // dist label
+    ctx.font = '16px Share Tech Mono, monospace';
+    ctx.fillStyle = 'rgba(0,207,255,0.7)';
+    ctx.fillText(formatDist(dist), x + 13, y + 14);
+    ctx.restore();
+  });
+
+  // ── Me dot (center) ──
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(CX, CY, 10, 0, Math.PI*2);
+  ctx.fillStyle = GREEN;
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = GREEN;
+  ctx.fill();
+  ctx.restore();
+
+  // Me name
+  ctx.save();
+  ctx.font = 'bold 22px Share Tech Mono, monospace';
+  ctx.fillStyle = GREEN;
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = GREEN;
+  ctx.fillText(state.myName, CX + 13, CY - 6);
+  ctx.restore();
+
+  ctx.restore(); // unclip
+
+  // ── Corner decorations ──
+  drawCorners();
+
+  // ── Cardinal points ──
+  ctx.font = 'bold 22px Orbitron, monospace';
+  ctx.fillStyle = GREEN_DIM;
+  ctx.textAlign = 'center';
+  ctx.fillText('N', CX, CY - R + 26);
+  ctx.fillText('S', CX, CY + R - 12);
+  ctx.textAlign = 'left';
+  ctx.fillText('E', CX + R - 26, CY + 8);
+  ctx.textAlign = 'right';
+  ctx.fillText('W', CX - R + 26, CY + 8);
+}
+
+function drawCorners() {
+  const s = 36; const t = 4;
+  ctx.strokeStyle = GREEN;
+  ctx.lineWidth = 4;
+  ctx.shadowBlur = 0;
+  // TL
+  ctx.beginPath(); ctx.moveTo(14, 14+s); ctx.lineTo(14,14); ctx.lineTo(14+s,14); ctx.stroke();
+  // TR
+  ctx.beginPath(); ctx.moveTo(W-14-s,14); ctx.lineTo(W-14,14); ctx.lineTo(W-14,14+s); ctx.stroke();
+  // BL
+  ctx.beginPath(); ctx.moveTo(14,H-14-s); ctx.lineTo(14,H-14); ctx.lineTo(14+s,H-14); ctx.stroke();
+  // BR
+  ctx.beginPath(); ctx.moveTo(W-14-s,H-14); ctx.lineTo(W-14,H-14); ctx.lineTo(W-14,H-14-s); ctx.stroke();
+}
+
+// ──────────────────────────────────────────────
+// ANIMATION LOOP
+// ──────────────────────────────────────────────
+function animate() {
+  if (state.running) {
+    state.scanAngle = (state.scanAngle + 0.025) % (Math.PI * 2);
+  }
+  drawRadar();
+  updateFriendsList();
+  state.animId = requestAnimationFrame(animate);
+}
+
+// ──────────────────────────────────────────────
+// GEO HELPERS
+// ──────────────────────────────────────────────
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2-lat1)*Math.PI/180;
+  const dLon = (lon2-lon1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function latLonToXY(lat, lon) {
+  if (!state.myPos) return { x: CX, y: CY };
+  const dlat = lat - state.myPos.lat;
+  const dlon = lon - state.myPos.lon;
+  const dy = -dlat * (CX*1000) / state.range / 111320;
+  const dx = dlon * (CY*1000) / state.range / (111320 * Math.cos(state.myPos.lat * Math.PI/180));
+  // scale to canvas
+  const scale = R / (W / 2);
+  return {
+    x: CX + dx * scale,
+    y: CY + dy * scale
+  };
+}
+
+// corrected: pixel = (delta_deg / range_deg) * R_canvas
+function latLonToXY2(lat, lon) {
+  if (!state.myPos) return { x: CX, y: CY };
+  const dlat = lat - state.myPos.lat;
+  const dlon = lon - state.myPos.lon;
+  // convert to meters
+  const dy_m = -dlat * 111320;
+  const dx_m = dlon * 111320 * Math.cos(state.myPos.lat * Math.PI / 180);
+  // scale: R px = state.range meters
+  const scale = R / state.range;
+  return {
+    x: Math.round(CX + dx_m * scale),
+    y: Math.round(CY + dy_m * scale)
+  };
+}
+
+function formatDist(m) {
+  if (m >= 1000) return (m/1000).toFixed(1) + ' km';
+  return Math.round(m) + ' m';
+}
+
+// Override latLonToXY with corrected version
+const _latLonToXY = latLonToXY2;
+// Monkey-patch drawRadar to use corrected
+const _draw = drawRadar;
+// Already using latLonToXY — let's just reassign
+window.latLonToXY = latLonToXY2;
+
+// ──────────────────────────────────────────────
+// GPS
+// ──────────────────────────────────────────────
+function startRadar() {
+  state.myName = document.getElementById('my-name').value.trim() || 'ME';
+  saveState();
+
+  if (!navigator.geolocation) {
+    setLog('❌ Geolocation non supportata su questo browser');
+    return;
+  }
+
+  setLog('🛰 Acquisizione GPS...');
+
+  const opts = { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 };
+
+  state.watchId = navigator.geolocation.watchPosition(
+    pos => {
+      state.myPos = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      state.running = true;
+      document.getElementById('status-dot').classList.add('active');
+      document.getElementById('status-txt').textContent = 'LIVE';
+      setLog(`📍 ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)} ±${Math.round(pos.coords.accuracy)}m`);
+      document.getElementById('range-label').textContent = formatDist(state.range);
+      refreshFriendPositions();
+    },
+    err => {
+      state.running = false;
+      document.getElementById('status-dot').classList.remove('active');
+      document.getElementById('status-txt').textContent = 'OFFLINE';
+      if (err.code === 1) {
+        setLog('⛔ Permesso GPS negato');
+        document.getElementById('modal-gps').classList.add('open');
+      } else if (err.code === 2) {
+        setLog('❌ Posizione non disponibile');
+      } else {
+        setLog('⏱ Timeout GPS');
+      }
+    },
+    opts
+  );
+
+  if (!state.animId) animate();
+}
+
+function stopRadar() {
+  if (state.watchId !== null) {
+    navigator.geolocation.clearWatch(state.watchId);
+    state.watchId = null;
+  }
+  state.running = false;
+  document.getElementById('status-dot').classList.remove('active');
+  document.getElementById('status-txt').textContent = 'OFFLINE';
+  setLog('■ Radar spento');
+}
+
+// ──────────────────────────────────────────────
+// SHARE
+// ──────────────────────────────────────────────
+function shareLocation() {
+  if (!state.myPos) { setLog('❌ GPS non attivo'); return; }
+  const name = encodeURIComponent(state.myName);
+  const lat = state.myPos.lat.toFixed(7);
+  const lon = state.myPos.lon.toFixed(7);
+  // Self-referencing URL with params
+  const base = window.location.href.split('?')[0];
+  const url = `${base}?n=${name}&lat=${lat}&lon=${lon}`;
+  document.getElementById('share-url').textContent = url;
+  document.getElementById('share-box').classList.add('visible');
+
+  // Also try native share
+  if (navigator.share) {
+    navigator.share({ title: `Posizione di ${state.myName}`, url }).catch(()=>{});
+  }
+}
+
+function copyLink() {
+  const url = document.getElementById('share-url').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    showCopiedFlash();
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showCopiedFlash();
+  });
+}
+
+function showCopiedFlash() {
+  const el = document.getElementById('copied-flash');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1200);
+}
+
+// ──────────────────────────────────────────────
+// AUTO-ADD FROM URL PARAMS (when friend shares link)
+// ──────────────────────────────────────────────
+function checkURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  const n   = params.get('n');
+  const lat = parseFloat(params.get('lat'));
+  const lon = parseFloat(params.get('lon'));
+  if (n && !isNaN(lat) && !isNaN(lon)) {
+    // auto add this friend
+    const id = 'f_' + Date.now();
+    const existing = state.friends.find(f => f.name === decodeURIComponent(n));
+    if (!existing) {
+      state.friends.push({ id, name: decodeURIComponent(n), lat, lon, dist: null });
+      saveState();
+      renderFriendsList();
+      setLog(`✅ Aggiunto amico: ${decodeURIComponent(n)}`);
+    }
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+}
+
+// ──────────────────────────────────────────────
+// FRIENDS
+// ──────────────────────────────────────────────
+function addFriend() {
+  const nameInput = document.getElementById('friend-name');
+  const linkInput = document.getElementById('friend-link');
+  const name = nameInput.value.trim();
+  const link = linkInput.value.trim();
+
+  if (!name) { setLog('❌ Inserisci nome amico'); return; }
+
+  let lat = NaN, lon = NaN;
+
+  // Try parse as URL param
+  try {
+    const u = new URL(link);
+    const p = new URLSearchParams(u.search);
+    lat = parseFloat(p.get('lat'));
+    lon = parseFloat(p.get('lon'));
+  } catch(e) {
+    // Try parse as "lat,lon"
+    const parts = link.split(',');
+    if (parts.length >= 2) {
+      lat = parseFloat(parts[0]);
+      lon = parseFloat(parts[1]);
+    }
+  }
+
+  if (isNaN(lat) || isNaN(lon)) {
+    // Add without position (manual)
+    if (!link) {
+      const id = 'f_' + Date.now();
+      state.friends.push({ id, name, lat: null, lon: null, dist: null });
+      saveState();
+      renderFriendsList();
+      nameInput.value = '';
+      setLog(`👤 ${name} aggiunto (senza posizione)`);
+      return;
+    }
+    setLog('❌ Link non valido. Usa il link condiviso dal radar.');
+    return;
+  }
+
+  const id = 'f_' + Date.now();
+  const existing = state.friends.findIndex(f => f.name === name);
+  if (existing >= 0) {
+    state.friends[existing].lat = lat;
+    state.friends[existing].lon = lon;
+    setLog(`🔄 Posizione aggiornata: ${name}`);
+  } else {
+    state.friends.push({ id, name, lat, lon, dist: null });
+    setLog(`✅ ${name} aggiunto`);
+  }
+
+  saveState();
+  renderFriendsList();
+  nameInput.value = '';
+  linkInput.value = '';
+}
+
+function removeFriend(id) {
+  state.friends = state.friends.filter(f => f.id !== id);
+  saveState();
+  renderFriendsList();
+}
+
+function refreshFriendPositions() {
+  if (!state.myPos) return;
+  state.friends.forEach(f => {
+    if (f.lat && f.lon) {
+      f.dist = haversine(state.myPos.lat, state.myPos.lon, f.lat, f.lon);
+    }
+  });
+}
+
+function renderFriendsList() {
+  const el = document.getElementById('friends-list');
+  if (state.friends.length === 0) {
+    el.innerHTML = '<div style="font-size:0.7rem;color:var(--green-dim);text-align:center;padding:10px">Nessun amico aggiunto</div>';
+    return;
+  }
+  el.innerHTML = state.friends.map(f => {
+    const dist = f.dist !== null ? formatDist(f.dist) : '?';
+    const hasPos = f.lat !== null;
+    return `<div class="friend-item ${hasPos ? 'active' : ''}" id="fi_${f.id}">
+      <div class="friend-status ${hasPos ? 'online' : ''}"></div>
+      <span class="friend-name">${f.name}</span>
+      <span class="friend-dist">${hasPos ? dist : 'no GPS'}</span>
+      <button class="friend-remove" onclick="removeFriend('${f.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function updateFriendsList() {
+  if (!state.myPos) return;
+  state.friends.forEach(f => {
+    if (f.lat && f.lon) {
+      f.dist = haversine(state.myPos.lat, state.myPos.lon, f.lat, f.lon);
+      const el = document.querySelector(`#fi_${f.id} .friend-dist`);
+      if (el) el.textContent = formatDist(f.dist);
+    }
+  });
+}
+
+// ──────────────────────────────────────────────
+// RANGE
+// ──────────────────────────────────────────────
+function updateRange(val) {
+  state.range = parseInt(val);
+  document.getElementById('range-val').textContent = formatDist(state.range);
+  document.getElementById('range-label').textContent = formatDist(state.range);
+}
+
+// ──────────────────────────────────────────────
+// UTILS
+// ──────────────────────────────────────────────
+function setLog(msg) {
+  document.getElementById('log').textContent = msg;
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ──────────────────────────────────────────────
+// INIT
+// ──────────────────────────────────────────────
+loadState();
+checkURLParams();
+renderFriendsList();
+animate(); // start idle animation
+</script>
+</body>
+</html>
