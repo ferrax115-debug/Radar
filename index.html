@@ -1,963 +1,905 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>RADAR 115</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,viewport-fit=cover"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="theme-color" content="#060410"/>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <script>
+    const mf={name:"Noi",short_name:"Noi",display:"fullscreen",orientation:"any",background_color:"#060410",theme_color:"#060410",start_url:"./",icons:[{src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23060410'/><text y='380' font-size='340' font-family='sans-serif' fill='%239b5dff'>♥</text></svg>",sizes:"512x512",type:"image/svg+xml"}]};
+    const bl=new Blob([JSON.stringify(mf)],{type:'application/json'});
+    const lk=document.createElement('link');lk.rel='manifest';lk.href=URL.createObjectURL(bl);
+    document.currentScript.after(lk);
+  </script>
+  <title>Noi</title>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html,body{
+      width:100%;height:100%;height:100dvh;
+      overflow:hidden;touch-action:none;
+      overscroll-behavior:none;
+      -webkit-tap-highlight-color:transparent;
+      font-family:'Inter',system-ui,sans-serif;
+    }
 
-  :root {
-    --green: #00ff41;
-    --green-dim: #00aa2a;
-    --green-dark: #003311;
-    --bg: #020a03;
-    --red: #ff3c3c;
-    --blue: #00cfff;
-  }
+    /* ── STARFIELD BG ── */
+    #stars{position:fixed;inset:0;z-index:0;
+      background:radial-gradient(ellipse at 42% 46%,#1a0a2e 0%,#0d0618 50%,#060410 100%);}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ── SCREENS ── */
+    .screen{
+      position:fixed;inset:0;z-index:10;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      transition:opacity .5s ease, transform .5s ease;
+    }
+    .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
 
-  body {
-    background: var(--bg);
-    color: var(--green);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100dvh;
-    display: flex; flex-direction: column; align-items: center;
-    overflow-x: hidden;
-  }
+    /* ── SCREEN 1: HOME ── */
+    #screen-home{gap:clamp(10px,3vmin,22px); z-index: 20;}
+    .home-title{
+      font-family:'Caveat',cursive;
+      font-size:clamp(3.5rem,15vmin,10rem);
+      font-weight:600;color:#fff;
+      background:linear-gradient(135deg,#fff 0%,#c084fc 45%,#9b5dff 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      line-height:1;letter-spacing:0.02em;
+    }
+    .home-sub{
+      font-size:clamp(11px,2.5vmin,15px);
+      letter-spacing:0.35em;text-transform:uppercase;
+      color:rgba(200,170,255,0.5);
+    }
+    .home-date{
+      font-family:'Caveat',cursive;
+      font-size:clamp(14px,3vmin,20px);
+      color:rgba(200,170,255,0.7);
+      margin-top:4px;
+    }
+    .btn-enter{
+      margin-top:clamp(16px,4vmin,32px);
+      padding:12px 32px;
+      border:1px solid rgba(155,93,255,0.45);
+      border-radius999px;
+      background:rgba(155,93,255,0.12);
+      backdrop-filter:blur(8px);
+      color:#d4aaff;
+      font-size:13px;letter-spacing:0.2em;text-transform:uppercase;
+      cursor:pointer;transition:all .2s;
+      pointer-events: auto !important;
+    }
+    .btn-enter:hover{background:rgba(155,93,255,0.25);border-color:rgba(155,93,255,0.7);}
 
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.15) 3px, rgba(0,0,0,0.15) 4px);
-    pointer-events: none; z-index: 1000;
-  }
+    /* ── SCREEN 2: TIMELINE MESI (MAGNETICO) ── */
+    #screen-months{
+      justify-content:center;
+      padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    .months-header{
+      width:100%;display:flex;align-items:center;
+      padding:clamp(14px,4vmin,28px) clamp(16px,5vw,32px) clamp(8px,2vmin,16px);
+      gap:14px;
+      position:absolute;top:0;left:0;z-index: 30;
+    }
+    .btn-back{
+      background:none;border:none;
+      color:rgba(155,93,255,0.7);cursor:pointer;
+      font-size:22px;line-height:1;padding:4px;
+    }
+    .months-title{
+      font-family:'Caveat',cursive;
+      font-size:clamp(20px,5vmin,34px);
+      color:#e0c8ff;font-weight:600;
+    }
+    
+    .months-scroll{
+      width:100%;
+      overflow-x:auto;overflow-y:hidden;
+      touch-action:pan-x;
+      display:flex;flex-direction:row;
+      align-items:center;
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+      scroll-behavior: smooth;
+      padding-left: calc(50vw - 150px);
+      padding-right: calc(50vw - 150px);
+      height: 420px;
+    }
+    .months-scroll::-webkit-scrollbar{display:none;}
 
-  header {
-    width: 100%; max-width: 480px;
-    padding: 12px 16px 8px;
-    border-bottom: 1px solid var(--green-dim);
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .logo { font-family: 'Orbitron', monospace; font-size: 1.3rem; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 12px var(--green), 0 0 30px var(--green-dim); }
-  .logo span { color: var(--green-dim); font-size: 0.7rem; letter-spacing: 2px; display: block; }
+    .month-card{
+      width: 300px;
+      height: 250px;
+      flex-shrink:0;
+      scroll-snap-align:center;
+      border-radius:24px;
+      border:1px solid rgba(155,93,255,0.15);
+      background:rgba(20,8,45,0.4);
+      backdrop-filter:blur(8px);
+      padding: 24px;
+      cursor:pointer;
+      position:relative;overflow:hidden;
+      
+      transform: scale(0.85);
+      opacity: 0.35;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                  opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), 
+                  border-color 0.3s, background 0.3s;
+      
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .month-card.active-center {
+      width: 315px;
+      height: 290px;
+      transform: scale(1.05);
+      opacity: 1;
+      background: rgba(35, 12, 70, 0.75);
+      border-color: rgba(155, 93, 255, 0.6);
+      box-shadow: 0 12px 35px rgba(155, 93, 255, 0.22);
+    }
 
-  .status-pill { display: flex; align-items: center; gap: 7px; font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: pdot 1.2s infinite; }
-  .status-dot.active { background: var(--green); box-shadow: 0 0 8px var(--green); }
-  @keyframes pdot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+    .month-card::before{
+      content:'';position:absolute;inset:0;
+      background:linear-gradient(135deg,rgba(155,93,255,0.07) 0%,transparent 60%);
+      pointer-events:none;
+    }
 
-  main { width: 100%; max-width: 480px; padding: 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; flex: 1; }
+    /* CARDS MESI FUTURI BLOCCATI */
+    .month-card.future-locked {
+      opacity: 0.12 !important;
+      cursor: default !important;
+      pointer-events: none !important;
+      border-style: dashed;
+    }
+    
+    .mc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+    .mc-left{display:flex;flex-direction:column;gap:4px;}
+    .mc-num{
+      font-size:11px;
+      letter-spacing:0.3em;text-transform:uppercase;
+      color:rgba(155,93,255,0.7);
+    }
+    .mc-name{
+      font-family:'Caveat',cursive;
+      font-size: 42px;
+      color:#e8d8ff;font-weight:600;line-height:1.1;
+    }
+    .mc-dates{
+      font-size:13px;
+      color:rgba(200,170,255,0.55);
+      margin-top:4px;
+    }
+    .mc-badge{
+      padding:6px 14px;border-radius:999px;
+      font-size:10px;
+      letter-spacing:0.15em;text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .mc-badge.current{background:rgba(155,93,255,0.3);color:#c084fc;border:1px solid rgba(155,93,255,0.5);font-weight:600;}
+    .mc-badge.done{background:rgba(80,40,160,0.2);color:rgba(180,140,255,0.6);border:1px solid rgba(100,60,180,0.2);}
+    .mc-badge.future{background:transparent;color:rgba(150,120,200,0.2);border:1px dashed rgba(100,70,140,0.2);}
+    .mc-heart{font-size: 38px; opacity:0.5;}
+    .mc-lock{font-size:22px;opacity:0.3;}
+    
+    .mc-progress{
+      margin-top:auto; height:4px;border-radius:999px;
+      background:rgba(155,93,255,0.15);overflow:hidden;
+    }
+    .mc-progress-fill{height:100%;border-radius:999px;
+      background:linear-gradient(90deg,#9b5dff,#c084fc);}
 
-  .radar-wrap { position: relative; width: min(92vw, 380px); height: min(92vw, 380px); }
-  canvas#radar { width: 100%; height: 100%; border-radius: 50%; display: block; filter: drop-shadow(0 0 20px var(--green-dim)); }
-  .range-label { position: absolute; bottom: 10px; right: 12px; font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; }
+    /* ── SCREEN 3: DETTAGLIO MESE ── */
+    #screen-detail{justify-content:flex-start;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);}
+    .detail-header{
+      width:100%;display:flex;align-items:center;
+      padding:clamp(14px,4vmin,28px) clamp(16px,5vw,32px) 0;
+      gap:14px;
+    }
+    .detail-title{
+      font-family:'Caveat',cursive;
+      font-size:clamp(24px,6vmin,40px);
+      color:#e0c8ff;font-weight:600;
+    }
+    .detail-sub{
+      font-size:11px;letter-spacing:0.25em;
+      text-transform:uppercase;color:rgba(180,150,255,0.45);
+      padding:0 clamp(16px,5vw,32px);
+      margin-bottom:clamp(10px,2.5vmin,18px);
+    }
 
-  /* Indicatore heading bussola */
-  .compass-hud {
-    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-    font-family: 'Orbitron', monospace; font-size: 0.6rem; letter-spacing: 2px;
-    color: var(--green-dim); background: rgba(2,10,3,0.7);
-    padding: 3px 8px; border-radius: 4px; border: 1px solid var(--green-dark);
-    white-space: nowrap; pointer-events: none;
-  }
-  .compass-hud.active { color: var(--green); border-color: var(--green-dim); }
+    /* Griglia giorni */
+    .days-scroll{
+      width:100%;flex:1;
+      overflow-y:auto;overflow-x:hidden;
+      touch-action:pan-y;
+      padding:0 clamp(12px,4vw,28px) 24px;
+      scrollbar-width:none;
+    }
+    .days-scroll::-webkit-scrollbar{display:none;}
+    
+    .days-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(clamp(65px,18vw,95px),1fr));
+      gap:clamp(6px,1.5vmin,10px);
+      align-items:center;
+    }
 
-  /* Accuracy badge */
-  .acc-badge {
-    position: absolute; top: 8px; right: 10px;
-    font-size: 0.58rem; color: var(--green-dim); letter-spacing: 1px;
-    background: rgba(2,10,3,0.7); padding: 2px 6px; border-radius: 3px;
-    border: 1px solid var(--green-dark); pointer-events: none;
-  }
-  .acc-badge.good { color: #00ff41; border-color: #003311; }
-  .acc-badge.mid  { color: #ffe000; border-color: #443300; }
-  .acc-badge.bad  { color: #ff3c3c; border-color: #440000; }
+    .day-card{
+      aspect-ratio:3/4;
+      border-radius:10px;
+      background:#f5f0e8;
+      display:flex;flex-direction:column;
+      overflow:hidden;cursor:pointer;
+      box-shadow:0 2px 8px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.1) inset;
+      transition:transform .18s ease,box-shadow .18s ease;
+      transform:rotate(var(--r,0deg));
+      position:relative;
+    }
+    .day-card:nth-child(odd){--r:-1.5deg;}
+    .day-card:nth-child(even){--r:1deg;}
+    .day-card:nth-child(3n){--r:2.5deg;}
+    .day-card:hover{transform:rotate(0deg) scale(1.08);box-shadow:0 8px 24px rgba(0,0,0,0.6);z-index:2;}
+    .day-photo{flex:1;background:#1a1228;position:relative;overflow:hidden;}
+    .day-photo-inner{
+      position:absolute;inset:0;
+      background:linear-gradient(160deg,#1a0a2e,#0d0618);
+      background-size: cover;
+      background-position: center;
+    }
+    
+    /* Indicatore cuore se il giorno ha già una foto salvata */
+    .day-card.has-uploaded-photo .day-photo-inner::before {
+      content: '♥';
+      position: absolute; bottom: 6px; right: 8px;
+      color: #9b5dff; font-size: 14px; z-index: 3;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
 
-  .controls { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+    .day-footer{
+      background:#f5f0e8;
+      padding:4px 6px 6px;
+      display:flex;flex-direction:column;align-items:center;
+      gap:1px;
+    }
+    .day-num{
+      font-family:'Caveat',cursive;
+      font-size:clamp(14px,3.5vmin,20px);
+      color:#2a1a3a;font-weight:600;line-height:1;
+    }
+    .day-label{
+      font-size:clamp(8px,1.8vmin,11px);
+      color:#7a6080;text-transform:uppercase;letter-spacing:0.1em;
+    }
 
-  .identity-row {
-    display: flex; gap: 8px; align-items: center;
-    background: var(--green-dark); border: 1px solid var(--green-dim);
-    border-radius: 6px; padding: 8px 10px;
-  }
-  .identity-row label { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; white-space: nowrap; }
+    /* CARD GIORNO FUTURO BLOCCATO */
+    .day-card.day-future-locked {
+      background: rgba(25, 10, 50, 0.3) !important;
+      border: 1px dashed rgba(155, 93, 255, 0.2) !important;
+      box-shadow: none !important;
+      cursor: default !important;
+      pointer-events: none !important;
+      transform: none !important;
+    }
+    .day-card.day-future-locked .day-photo {
+      background: transparent !important;
+    }
+    .day-card.day-future-locked .day-photo-inner {
+      display: flex; align-items: center; justify-content: center;
+      background: transparent !important;
+    }
+    .day-card.day-future-locked .day-photo-inner::after {
+      content: '🔒'; font-size: 16px; opacity: 0.35;
+    }
+    .day-card.day-future-locked .day-footer {
+      background: transparent !important;
+    }
+    .day-card.day-future-locked .day-num {
+      color: rgba(155, 93, 255, 0.4) !important;
+    }
+    .day-card.day-future-locked .day-label {
+      color: rgba(155, 93, 255, 0.2) !important;
+    }
 
-  input[type="text"] {
-    background: transparent; border: none; border-bottom: 1px solid var(--green-dim);
-    color: var(--green); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;
-    padding: 4px 6px; outline: none; flex: 1; min-width: 0;
-  }
-  input[type="text"]:focus { border-bottom-color: var(--green); }
+    /* ── SCREEN 4: POLAROID FULLSCREEN (PIVOT 3D VERTICALE) ── */
+    #screen-polaroid{
+      background:rgba(6,4,16,0.96);
+      backdrop-filter:blur(20px);
+      perspective: 1200px;
+    }
+    #screen-polaroid.hidden{opacity:0;pointer-events:none;}
+    .pol-header{
+      position:absolute;top:0;left:0;right:0;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:clamp(14px,4vmin,24px) clamp(16px,5vw,28px);
+      padding-top:calc(clamp(14px,4vmin,24px) + env(safe-area-inset-top));
+      z-index: 50;
+    }
+    .pol-daytitle{
+      font-family:'Caveat',cursive;
+      font-size:clamp(18px,5vmin,30px);
+      color:#e0c8ff;font-weight:600;
+    }
+    .btn-close{
+      background:rgba(155,93,255,0.15);
+      border:1px solid rgba(155,93,255,0.3);
+      border-radius:50%;width:36px;height:36px;
+      color:#c084fc;font-size:18px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:all .15s;
+    }
+    .btn-close:hover{background:rgba(155,93,255,0.35);}
+    
+    #polaroid-stage{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      width:100%;height:100%;
+      pointer-events:none;
+      transform-style: preserve-3d;
+      gap: 20px;
+    }
+    
+    #big-polaroid{
+      pointer-events:auto;
+      width: clamp(240px, 68vmin, 380px);
+      background: #f5f0e8;
+      padding: clamp(14px, 3vmin, 22px);
+      padding-bottom: clamp(45px, 12vmin, 80px);
+      border-radius: 4px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 30px 90px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.8);
+      cursor: grab;
+      user-select: none; -webkit-user-select: none;
+      touch-action: none;
+      transform-style: preserve-3d;
+      will-change: transform;
+      position: relative;
+    }
+    
+    #big-polaroid::after {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 4px;
+      pointer-events: none;
+      background: linear-gradient(var(--light-deg, 120deg), rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.18) 100%);
+      mix-blend-mode: overlay;
+      transition: opacity 0.2s;
+    }
+    
+    #big-polaroid.grabbed{
+      cursor: grabbing;
+    }
+    #big-polaroid .big-photo{
+      width:100%; aspect-ratio:1/1;
+      background:linear-gradient(160deg,#1a0a2e 0%,#0d0618 100%);
+      position:relative; overflow:hidden;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+      background-size: cover;
+      background-position: center;
+    }
+    #big-polaroid .big-caption{
+      text-align:center;
+      margin-top: clamp(12px, 3vmin, 20px);
+      font-family:'Caveat',cursive;
+      font-size: clamp(18px, 4.5vmin, 28px);
+      color:#2a1a3a; opacity:0.85;
+      pointer-events:none;
+    }
 
-  .color-picker-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .color-picker-row label { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; white-space: nowrap; }
-  .color-swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all .15s; flex-shrink: 0; }
-  .color-swatch.selected { border-color: #fff; box-shadow: 0 0 10px currentColor; transform: scale(1.2); }
+    /* Area pulsanti interattivi sotto la polaroid */
+    .photo-controls {
+      pointer-events: auto;
+      display: flex; gap: 12px; z-index: 60;
+    }
+    .btn-upload {
+      padding: 10px 22px;
+      background: rgba(155, 93, 255, 0.25);
+      border: 1px solid rgba(155, 93, 255, 0.6);
+      border-radius: 999px;
+      color: #e0c8ff; font-size: 12px; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-upload:hover {
+      background: rgba(155, 93, 255, 0.45);
+      box-shadow: 0 0 15px rgba(155,93,255,0.4);
+    }
 
-  button { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; letter-spacing: 2px; cursor: pointer; border-radius: 4px; padding: 8px 14px; transition: all .15s; white-space: nowrap; }
-  .btn-green { background: var(--green-dark); color: var(--green); border: 1px solid var(--green-dim); }
-  .btn-green:active, .btn-green:hover { background: var(--green); color: var(--bg); box-shadow: 0 0 12px var(--green); }
-  .btn-red { background: #1a0000; color: var(--red); border: 1px solid #882222; }
-  .btn-red:active { background: var(--red); color: var(--bg); }
-  .btn-blue { background: #001a22; color: var(--blue); border: 1px solid #005577; }
-  .btn-blue:active, .btn-blue:hover { background: var(--blue); color: var(--bg); }
+    .pol-hint{
+      position:absolute; bottom:calc(env(safe-area-inset-bottom) + 12px);
+      left:50%; transform:translateX(-50%);
+      font-size:10px; letter-spacing:0.2em; text-transform:uppercase;
+      color:rgba(180,150,255,0.3); pointer-events:none;
+    }
 
-  .input-row { display: flex; gap: 8px; align-items: center; }
+    /* Banner iOS */
+    #ios-banner{
+      position:fixed; bottom:calc(env(safe-area-inset-bottom) + 14px);
+      left:50%; transform:translateX(-50%);
+      background:rgba(20,6,40,0.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+      border:1px solid rgba(155,93,255,0.4); border-radius:16px;
+      padding:11px 20px 11px 16px; display:flex; align-items:center; gap:12px;
+      font-family:system-ui,-apple-system,sans-serif; font-size:12px; color:#c8a8ff;
+      white-space:nowrap; z-index:9999; animation:slideUp .4s ease;
+    }
+    #ios-banner strong{color:#e0ccff; font-weight:600;}
+    #ios-banner button{background:none; border:none; color:#9b5dff; font-size:16px; cursor:pointer; padding:0 2px;}
 
-  .range-row { display: flex; align-items: center; gap: 8px; width: 100%; }
-  input[type=range] { -webkit-appearance: none; flex: 1; height: 4px; background: var(--green-dark); border-radius: 2px; outline: none; border: 1px solid var(--green-dim); }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); cursor: pointer; }
-  .range-val { font-size: 0.75rem; color: var(--green); min-width: 56px; text-align: right; }
-
-  .room-box { width: 100%; background: var(--green-dark); border: 1px solid var(--green-dim); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-  .room-header { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; font-family: 'Orbitron', monospace; }
-  .room-link { font-size: 0.7rem; color: var(--green); word-break: break-all; border: 1px dashed var(--green-dim); padding: 6px 8px; border-radius: 4px; cursor: pointer; line-height: 1.4; }
-  .room-link:hover { border-color: var(--green); }
-
-  .section-title { font-family: 'Orbitron', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--green-dim); border-bottom: 1px solid var(--green-dark); padding-bottom: 6px; margin-bottom: 8px; }
-  #friends-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
-  .friend-item { background: var(--green-dark); border: 1px solid var(--green-dim); border-radius: 4px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; gap: 8px; }
-  .friend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .friend-name { color: var(--green); font-weight: bold; flex: 1; }
-  .friend-dist { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; white-space: nowrap; }
-
-  #log { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 1px; min-height: 16px; text-align: center; }
-
-  .copied-flash { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--green); color: var(--bg); font-family: 'Orbitron', monospace; font-size: 0.9rem; letter-spacing: 3px; padding: 12px 24px; border-radius: 6px; z-index: 900; pointer-events: none; opacity: 0; transition: opacity .15s; }
-  .copied-flash.show { opacity: 1; }
-
-  #my-color-preview { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; transition: background .2s, box-shadow .2s; }
-
-  /* Orientation toggle button */
-  .orient-btn {
-    position: absolute; bottom: 10px; left: 10px;
-    font-family: 'Orbitron', monospace; font-size: 0.6rem; letter-spacing: 1px;
-    background: rgba(2,10,3,0.85); color: var(--green-dim);
-    border: 1px solid var(--green-dark); border-radius: 20px;
-    padding: 5px 10px; cursor: pointer; z-index: 10;
-    transition: all .2s; white-space: nowrap;
-    display: flex; align-items: center; gap: 5px;
-  }
-  .orient-btn.auto-mode {
-    color: var(--green); border-color: var(--green-dim);
-    box-shadow: 0 0 8px rgba(0,255,65,0.3);
-  }
-  .orient-btn .ob-icon { font-size: 0.9rem; }
-
-  /* North indicator: small triangle that rotates around center to show true north */
-  .north-arrow {
-    position: absolute;
-    width: 0; height: 0;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-bottom: 16px solid #ff4444;
-    filter: drop-shadow(0 0 6px #ff3333);
-    pointer-events: none; z-index: 20;
-    /* transform-origin at center of radar — set via JS */
-  }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--green-dark); }
-  ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 2px; }
-</style>
+    @keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(12px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+    .fadein{animation:fadeInUp .4s ease both;}
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">RADAR 115<span>REALTIME GPS</span></div>
-  <div class="status-pill">
-    <span id="status-txt">OFFLINE</span>
-    <div class="status-dot" id="status-dot"></div>
+<canvas id="stars"></canvas>
+
+<input type="file" id="secure-photo-input" accept="image/*" style="display:none;"/>
+
+<div id="screen-home" class="screen">
+  <div class="home-title">Noi</div>
+  <div class="home-sub">Pietro &amp; Silvia</div>
+  <div class="home-date" id="home-date"></div>
+  <button class="btn-enter" id="btn-enter">Entra ♥</button>
+</div>
+
+<div id="screen-months" class="screen hidden">
+  <div class="months-header">
+    <button class="btn-back" id="back-months">←</button>
+    <span class="months-title">I nostri mesi</span>
   </div>
-</header>
+  <div class="months-scroll" id="months-scroll"></div>
+</div>
 
-<main>
-
-  <div class="radar-wrap">
-    <canvas id="radar" width="760" height="760"></canvas>
-    <div class="range-label" id="range-label">500 m</div>
-    <div class="compass-hud" id="compass-hud">HDG ---°</div>
-    <div class="acc-badge bad" id="acc-badge">ACC --</div>
-    <!-- Triangolino nord fisso (indica dove è il nord nello schermo) -->
-    <div class="north-arrow" id="north-arrow" style="display:none"></div>
-    <!-- Bottone modalità orientamento -->
-    <button class="orient-btn" id="orient-btn" onclick="toggleOrientMode()">
-      <span class="ob-icon" id="orient-icon">🔒</span>
-      <span id="orient-label">NORD FISSO</span>
-    </button>
+<div id="screen-detail" class="screen hidden">
+  <div class="detail-header">
+    <button class="btn-back" id="back-detail">←</button>
+    <span class="detail-title" id="detail-title"></span>
   </div>
-
-  <div id="log">Imposta nome, colore e premi START</div>
-
-  <div class="controls">
-
-    <div class="identity-row">
-      <label>NOME:</label>
-      <input type="text" id="my-name" placeholder="il tuo nick" maxlength="14">
-    </div>
-
-    <div class="identity-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <label>COLORE PUNTO:</label>
-        <div id="my-color-preview"></div>
-      </div>
-      <div class="color-picker-row" id="color-picker"></div>
-    </div>
-
-    <div class="input-row">
-      <button class="btn-green" style="flex:1" onclick="startRadar()">▶ START</button>
-      <button class="btn-red" onclick="stopRadar()">■ STOP</button>
-    </div>
-
-    <div class="range-row">
-      <label style="font-size:0.65rem;color:var(--green-dim);letter-spacing:2px;white-space:nowrap;">RANGE:</label>
-      <input type="range" id="range-slider" min="10" max="3000" value="500" step="10" oninput="updateRange(this.value)">
-      <span class="range-val" id="range-val">500 m</span>
-    </div>
-
-    <div class="room-box">
-      <div class="room-header">// STANZA RADAR</div>
-      <div class="input-row">
-        <label style="font-size:0.65rem;color:var(--green-dim);letter-spacing:2px;">ID:</label>
-        <input type="text" id="room-id" placeholder="nome stanza (es. lab115)" maxlength="20"
-          style="background:transparent;border:none;border-bottom:1px solid var(--green-dim);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:4px 6px;outline:none;flex:1;">
-        <button class="btn-blue" onclick="shareRoom()">📡 SHARE</button>
-      </div>
-      <div id="room-link-box" style="display:none;flex-direction:column;gap:4px;">
-        <div class="room-link" id="room-link-txt" onclick="copyRoomLink()">—</div>
-        <div style="font-size:0.6rem;color:var(--green-dim);">Manda questo link agli amici — appariranno automaticamente</div>
-      </div>
-    </div>
-
+  <div class="detail-sub" id="detail-sub"></div>
+  <div class="days-scroll">
+    <div class="days-grid" id="days-grid"></div>
   </div>
+</div>
 
-  <div style="width:100%">
-    <div class="section-title">// SEGNALI RILEVATI</div>
-    <div id="friends-list"><div style="font-size:0.7rem;color:var(--green-dim);text-align:center;padding:10px">Nessun segnale</div></div>
+<div id="screen-polaroid" class="screen hidden">
+  <div class="pol-header">
+    <span class="pol-daytitle" id="pol-daytitle"></span>
+    <button class="btn-close" id="btn-close-pol">✕</button>
   </div>
+  <div id="polaroid-stage">
+    <div id="big-polaroid">
+      <div class="big-photo" id="big-photo"></div>
+      <div class="big-caption" id="big-caption"></div>
+    </div>
+    <div class="photo-controls">
+      <button class="btn-upload" id="btn-trigger-upload">Aggiungi Foto ♥</button>
+    </div>
+  </div>
+  <div class="pol-hint">Trascina lateralmente (Gira 3D)</div>
+</div>
 
-</main>
+<script>
+/* ═══════════════════════════════════════
+   STARFIELD BG
+═══════════════════════════════════════ */
+const canvas=document.getElementById('stars'),ctx=canvas.getContext('2d');
+let W,H,stars=[];
+const ARM_V=14,ARM_H=5.5,COUNT=200;
 
-<div class="copied-flash" id="copied-flash">COPIATO</div>
-
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBgL6IEgrnxKkqhUWBvxMNIOlLYB4gFZk4",
-  authDomain: "radar-b871d.firebaseapp.com",
-  databaseURL: "https://radar-b871d-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "radar-b871d",
-  storageBucket: "radar-b871d.firebasestorage.app",
-  messagingSenderId: "981308908775",
-  appId: "1:981308908775:web:1b5bbc396849f12a166e42"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-
-const COLORS = [
-  { hex:'#00cfff', label:'Ciano'   },
-  { hex:'#00ff41', label:'Verde'   },
-  { hex:'#ffe000', label:'Giallo'  },
-  { hex:'#ff8c00', label:'Arancio' },
-  { hex:'#ff3c3c', label:'Rosso'   },
-  { hex:'#ff5fdf', label:'Rosa'    },
-  { hex:'#b066ff', label:'Viola'   },
-  { hex:'#ffffff', label:'Bianco'  },
-];
-
-// ── GPS PRECISION ENGINE ──
-// Kalman adattivo (process noise varia con l'accuracy del fix)
-class AdaptiveKalman {
-  constructor() {
-    this.P  = 1;
-    this.x  = null;
-    this.Q  = 0.0000001;   // process noise molto basso = fiducia nella predizione
-  }
-  update(z, accMeters) {
-    // R (measurement noise) proporzionale all'accuracy reale dichiarata dal chip
-    // convertiamo accuracy in gradi: 1° lat ≈ 111320m
-    const R = Math.pow(accMeters / 111320, 2);
-    if (this.x === null) { this.x = z; return z; }
-    this.P += this.Q;
-    const K = this.P / (this.P + R);
-    this.x += K * (z - this.x);
-    this.P *= (1 - K);
-    return this.x;
-  }
-  reset(z) { this.x = z; this.P = 1; }
+function resize(){
+  const vp=window.visualViewport;
+  W=canvas.width=vp?vp.width:window.innerWidth;
+  H=canvas.height=vp?vp.height:window.innerHeight;
 }
-
-// Buffer degli ultimi N fix buoni — media pesata per accuracy
-class GpsBuffer {
-  constructor(maxSize = 8) {
-    this.buf = [];
-    this.maxSize = maxSize;
-  }
-  push(lat, lon, acc) {
-    // Scarta fix con accuracy peggiore di 5× il migliore nel buffer (outlier)
-    if (this.buf.length >= 3) {
-      const best = Math.min(...this.buf.map(b => b.acc));
-      if (acc > best * 5 && acc > 30) return; // outlier, ignora
-    }
-    this.buf.push({ lat, lon, acc });
-    if (this.buf.length > this.maxSize) this.buf.shift();
-  }
-  // Media pesata: peso = 1/acc² (fix più precisi pesano di più)
-  get() {
-    if (!this.buf.length) return null;
-    let wLat=0, wLon=0, wSum=0;
-    this.buf.forEach(b => {
-      const w = 1 / (b.acc * b.acc);
-      wLat += b.lat * w;
-      wLon += b.lon * w;
-      wSum += w;
-    });
-    return { lat: wLat/wSum, lon: wLon/wSum };
-  }
-  reset() { this.buf = []; }
-}
-
-const kalmanLat = new AdaptiveKalman();
-const kalmanLon = new AdaptiveKalman();
-const gpsBuffer = new GpsBuffer(8);
-
-// ── STATE ──
-const state = {
-  running:    false,
-  myPos:      null,           // {lat, lon} filtrato
-  myRawPos:   null,           // raw per confronto
-  myAccuracy: null,
-  myName:     'ME',
-  myColor:    '#00cfff',
-  myId:       'u_' + Math.random().toString(36).substr(2, 9),
-  range:      500,
-  watchId:    null,
-  scanAngle:  0,
-  animId:     null,
-  room:       'default',
-  peers:      {},
-  peerRef:    null,
-  unsubscribe: null,
-  pushTimer:  null,
-
-  // Bussola
-  heading:       null,   // gradi 0-360, 0=nord
-  headingSmooth: 0,
-  compassActive: false,
-  orientMode:    'north',   // 'north' | 'auto'
-};
-
-// ── CANVAS ──
-const canvas = document.getElementById('radar');
-const ctx    = canvas.getContext('2d');
-const W = canvas.width, H = canvas.height;
-const CX = W/2, CY = H/2;
-const R  = W/2 - 28;
-
-// ── COLOR PICKER ──
-function updateColorPreview() {
-  const p = document.getElementById('my-color-preview');
-  p.style.background = state.myColor;
-  p.style.boxShadow  = `0 0 10px ${state.myColor}`;
-}
-
-function buildColorPicker() {
-  const wrap = document.getElementById('color-picker');
-  wrap.innerHTML = '';
-  COLORS.forEach(c => {
-    const sw = document.createElement('div');
-    sw.className = 'color-swatch' + (c.hex === state.myColor ? ' selected' : '');
-    sw.style.background = c.hex;
-    sw.style.boxShadow  = c.hex === state.myColor ? `0 0 10px ${c.hex}` : 'none';
-    sw.title = c.label;
-    sw.onclick = () => {
-      state.myColor = c.hex;
-      buildColorPicker();
-      updateColorPreview();
-      try { localStorage.setItem('r115_color', state.myColor); } catch(e){}
-      if (state.running) pushMyPosition();
-    };
-    wrap.appendChild(sw);
+function rand(a,b){return a+Math.random()*(b-a);}
+function spawnStars(){
+  stars=Array.from({length:COUNT},()=>{
+    const z=Math.pow(Math.random(),1.8),sp=0.015+z*0.18,ang=rand(0,Math.PI*2);
+    return{x:rand(0,W),y:rand(0,H),vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,
+      z,alpha:rand(0.1,0.9),dAlpha:rand(0.001,0.004)*(Math.random()<0.5?1:-1),violet:Math.random()<0.38};
   });
-  updateColorPreview();
 }
-
-// ── ORIENTATION MODE ──
-// orientMode: 'north' = nord sempre in cima (classico)
-//             'auto'  = il radar ruota seguendo l'heading del telefono
-
-window.toggleOrientMode = function() {
-  if (state.orientMode === 'north') {
-    // Passa ad AUTO — richiede permesso bussola
-    requestCompassPermission(() => {
-      state.orientMode = 'auto';
-      document.getElementById('orient-btn').classList.add('auto-mode');
-      document.getElementById('orient-icon').textContent = '🧭';
-      document.getElementById('orient-label').textContent = 'AUTO';
-      document.getElementById('north-arrow').style.display = 'block';
-    });
-  } else {
-    state.orientMode = 'north';
-    state.compassActive = false;
-    state.headingSmooth = 0;
-    document.getElementById('orient-btn').classList.remove('auto-mode');
-    document.getElementById('orient-icon').textContent = '🔒';
-    document.getElementById('orient-label').textContent = 'NORD FISSO';
-    document.getElementById('north-arrow').style.display = 'none';
-    document.getElementById('compass-hud').textContent = 'HDG ---°';
-    document.getElementById('compass-hud').classList.remove('active');
-  }
-};
-
-function requestCompassPermission(onGranted) {
-  if (typeof DeviceOrientationEvent !== 'undefined' &&
-      typeof DeviceOrientationEvent.requestPermission === 'function') {
-    // iOS 13+
-    DeviceOrientationEvent.requestPermission()
-      .then(r => {
-        if (r === 'granted') { bindOrientation(); onGranted(); }
-        else setLog('⚠️ Permesso bussola negato — vai in Impostazioni Safari');
-      })
-      .catch(() => setLog('⚠️ Bussola non disponibile'));
-  } else if (window.DeviceOrientationEvent) {
-    bindOrientation();
-    onGranted();
-  } else {
-    setLog('⚠️ Bussola non supportata su questo dispositivo');
-  }
-}
-
-let _orientBound = false;
-function bindOrientation() {
-  if (_orientBound) return;
-  _orientBound = true;
-  // Preferisce absolute (nord geografico), fallback su normale
-  window.addEventListener('deviceorientationabsolute', onOrientation, true);
-  window.addEventListener('deviceorientation', onOrientation, true);
-}
-
-// ── Telefono PIATTO: usa beta/gamma invece di alpha ──
-// Quando il telefono è orizzontale (beta ≈ 0, gamma ≈ 0), 
-// alpha è ancora valido ma potrebbe essere instabile su alcuni device.
-// Usiamo webkitCompassHeading quando disponibile (iOS) — già compensato.
-// Su Android applichiamo correzione per schermo verticale vs orizzontale.
-function computeHeading(e) {
-  // iOS Safari: webkitCompassHeading è sempre corretto indipendentemente 
-  // dall'orientazione del dispositivo
-  if (e.webkitCompassHeading != null) {
-    return e.webkitCompassHeading;
-  }
-
-  if (e.alpha == null) return null;
-
-  // Android: alpha = rotazione attorno asse Z (yaw)
-  // Se assoluto, 0 = nord; senso antiorario → invertiamo
-  const alpha = e.alpha;
-  const beta  = e.beta  || 0;   // inclinazione avanti/indietro (-180..180)
-  const gamma = e.gamma || 0;   // inclinazione sinistra/destra (-90..90)
-
-  // Telefono piatto (face-up): beta≈0, gamma≈0 → alpha è direttamente heading
-  // Telefono verticale (portrait): beta≈90 → orientazione normale
-  // Applichiamo la compensazione della tilt per avere heading stabile
-  // in qualsiasi posizione del telefono
-  
-  // Converti in radianti
-  const aR = alpha * Math.PI / 180;
-  const bR = beta  * Math.PI / 180;
-  const gR = gamma * Math.PI / 180;
-
-  // Matrice di rotazione → estrai heading compensato per tilt
-  // Formula standard per compass tilt compensation
-  const x = Math.cos(aR) * Math.cos(gR) + Math.sin(aR) * Math.sin(bR) * Math.sin(gR);
-  const y = Math.sin(aR) * Math.cos(bR);
-  
-  let heading = Math.atan2(-y, x) * 180 / Math.PI;
-  if (heading < 0) heading += 360;
-
-  // Se absolute=true il nord è già calibrato
-  if (!e.absolute) {
-    // Non assoluto: usiamo comunque il valore, ma avvisiamo
-    // (non c'è modo di correggere senza magnetometro calibrato)
-  }
-
-  return heading;
-}
-
-function onOrientation(e) {
-  // Ignora evento non-absolute se già ricevuto uno absolute (evita doppio handler)
-  if (e.type === 'deviceorientation' && e.absolute) return; // è già gestito dall'altro listener
-
-  const heading = computeHeading(e);
-  if (heading === null) return;
-
-  state.compassActive = true;
-  state.heading = heading;
-
-  if (state.orientMode === 'auto') {
-    const hud = document.getElementById('compass-hud');
-    hud.textContent = `HDG ${Math.round(heading).toString().padStart(3,'0')}°`;
-    hud.classList.add('active');
-
-    // Triangolino nord: posizionato sul bordo, punta al vero nord
-    const arrow = document.getElementById('north-arrow');
-    if (arrow && arrow.style.display !== 'none') {
-      // northAngle = dove si trova il nord reale sul cerchio
-      // Il radar è ruotato di -heading, quindi il nord è a -heading gradi dal top
-      const northDeg = -state.headingSmooth; // angolo sul cerchio (0=top=nord)
-      const northRad = northDeg * Math.PI / 180;
-      const wrap = document.querySelector('.radar-wrap');
-      const size = wrap ? wrap.offsetWidth : 380;
-      const cx = size / 2;
-      const edgeR = size / 2 - 10; // distanza dal centro al bordo interno
-      // Posizione del triangolo: sul cerchio, puntato verso il centro
-      const nx = cx + Math.sin(-northRad) * edgeR;
-      const ny = cx - Math.cos(-northRad) * edgeR;
-      // Rotazione: il triangolo ha base in basso, punta verso il basso di default
-      // Per puntare verso il centro dal bordo, ruotiamo di 180° + angolo
-      const rot = northDeg + 180;
-      arrow.style.left      = (nx - 7) + 'px';
-      arrow.style.top       = (ny - 8) + 'px';
-      arrow.style.transform = `rotate(${rot}deg)`;
-    }
-  }
-}
-
-// startCompass ora è solo un alias (il vero avvio è via bottone)
-function startCompass() {
-  // Non fare nulla all'avvio — l'utente sceglie la modalità col bottone
-  // Al primo avvio siamo in NORD FISSO
-}
-
-// ── INIT ──
-function init() {
-  try {
-    const n = localStorage.getItem('r115_name');  if (n) { state.myName = n; document.getElementById('my-name').value = n; }
-    const c = localStorage.getItem('r115_color'); if (c) state.myColor = c;
-    const r = localStorage.getItem('r115_room');  if (r) document.getElementById('room-id').value = r;
-  } catch(e){}
-
-  const p = new URLSearchParams(window.location.search);
-  const rp = p.get('room');
-  if (rp) { document.getElementById('room-id').value = rp; setLog('📡 Stanza: ' + rp + ' — premi START'); }
-
-  buildColorPicker();
-  animate();
-}
-
-// ── START ──
-window.startRadar = function() {
-  state.myName  = document.getElementById('my-name').value.trim() || 'ME';
-  state.room    = document.getElementById('room-id').value.trim() || 'default';
-  document.getElementById('room-id').value = state.room;
-
-  try {
-    localStorage.setItem('r115_name',  state.myName);
-    localStorage.setItem('r115_color', state.myColor);
-    localStorage.setItem('r115_room',  state.room);
-  } catch(e){}
-
-  if (!navigator.geolocation) { setLog('❌ Geolocation non supportata'); return; }
-  setLog('🛰 Acquisizione GPS...');
-
-  // ── GPS ad altissima precisione ──
-  const opts = {
-    enableHighAccuracy: true,
-    timeout:            30000,
-    maximumAge:         0      // ZERO cache — sempre posizione fresca
-  };
-
-  state.watchId = navigator.geolocation.watchPosition(
-    pos => {
-      const rawLat = pos.coords.latitude;
-      const rawLon = pos.coords.longitude;
-      const acc    = pos.coords.accuracy;
-
-      state.myAccuracy = acc;
-
-      // 1) Kalman adattivo: R scala con accuracy reale del chip
-      const kLat = kalmanLat.update(rawLat, acc);
-      const kLon = kalmanLon.update(rawLon, acc);
-
-      // 2) Accumula nel buffer (scarta outlier automaticamente)
-      gpsBuffer.push(kLat, kLon, acc);
-
-      // 3) Media pesata del buffer = posizione finale ultra-smussata
-      const best = gpsBuffer.get();
-      const fLat = best ? best.lat : kLat;
-      const fLon = best ? best.lon : kLon;
-
-      // Reset se spostamento fisico reale > 200m
-      if (state.myPos) {
-        const jumpM = haversine(state.myPos.lat, state.myPos.lon, rawLat, rawLon);
-        if (jumpM > 200) {
-          kalmanLat.reset(rawLat); kalmanLon.reset(rawLon);
-          gpsBuffer.reset();
-        }
-      }
-
-      state.myPos    = { lat: fLat, lon: fLon };
-      state.myRawPos = { lat: rawLat, lon: rawLon };
-      state.running  = true;
-
-      document.getElementById('status-dot').classList.add('active');
-      document.getElementById('status-txt').textContent = 'LIVE';
-
-      // Accuracy badge
-      updateAccBadge(acc);
-
-      setLog(`📍 ±${Math.round(acc)}m — ${fLat.toFixed(7)}, ${fLon.toFixed(7)}`);
-      document.getElementById('range-label').textContent = formatDist(state.range);
-
-      pushMyPosition();
-      listenPeers();
-    },
-    err => {
-      state.running = false;
-      document.getElementById('status-dot').classList.remove('active');
-      document.getElementById('status-txt').textContent = 'OFFLINE';
-      if (err.code === 1)      setLog('⛔ Permesso GPS negato');
-      else if (err.code === 2) setLog('❌ Posizione non disponibile');
-      else                     setLog('⏱ Timeout GPS — riprovo...');
-    },
-    opts
-  );
-
-  // Avvia bussola
-  startCompass();
-};
-
-// ── ACCURACY BADGE ──
-function updateAccBadge(acc) {
-  const b = document.getElementById('acc-badge');
-  b.textContent = `±${Math.round(acc)}m`;
-  b.className = 'acc-badge ' + (acc <= 8 ? 'good' : acc <= 25 ? 'mid' : 'bad');
-}
-
-// ── STOP ──
-window.stopRadar = function() {
-  if (state.watchId !== null) { navigator.geolocation.clearWatch(state.watchId); state.watchId = null; }
-  if (state.peerRef) try { remove(state.peerRef); } catch(e){}
-  if (state.unsubscribe) { state.unsubscribe(); state.unsubscribe = null; }
-  if (state.pushTimer) { clearTimeout(state.pushTimer); state.pushTimer = null; }
-  state.running = false;
-  state.peers   = {};
-  document.getElementById('status-dot').classList.remove('active');
-  document.getElementById('status-txt').textContent = 'OFFLINE';
-  document.getElementById('acc-badge').textContent = 'ACC --';
-  document.getElementById('acc-badge').className = 'acc-badge bad';
-  setLog('■ Radar spento');
-  renderFriendsList();
-};
-
-// ── PUSH POSITION ──
-function pushMyPosition() {
-  if (!state.myPos || !state.running) return;
-  const path = `rooms/${state.room}/users/${state.myId}`;
-  state.peerRef = ref(db, path);
-  set(state.peerRef, {
-    name:  state.myName,
-    color: state.myColor,
-    lat:   state.myPos.lat,
-    lon:   state.myPos.lon,
-    ts:    Date.now()
+function drawStar(cx,cy,alpha,z,violet){
+  if(alpha<0.01)return;
+  const sc=0.18+z*0.92,sh=0.25+z*0.75,fa=alpha*sh;
+  const ri=Math.round(190+z*30),gi=Math.round(150+z*60);
+  const color=violet?`${ri},${gi},255`:`${Math.round(200+z*20)},${Math.round(195+z*15)},255`;
+  const vL=ARM_V*sc,hL=ARM_H*sc,lw=Math.max(0.3,sc*0.65);
+  [[cx,cy,cx,cy-vL],[cx,cy,cx,cy+vL],[cx,cy,cx-hL,cy],[cx,cy,cx+hL,cy]].forEach(([x0,y0,x1,y1])=>{
+    const g=ctx.createLinearGradient(x0,y0,x1,y1);
+    [[0,1],[.08,.92],[.2,.75],[.4,.48],[.65,.20],[.85,.06],[1,0]].forEach(([t,a])=>
+      g.addColorStop(t,`rgba(${color},${(fa*a).toFixed(3)})`));
+    ctx.save();ctx.strokeStyle=g;ctx.lineWidth=lw;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.restore();
   });
-  if (state.pushTimer) clearTimeout(state.pushTimer);
-  state.pushTimer = setTimeout(pushMyPosition, 2000);
+}
+function drawStars(){
+  ctx.clearRect(0,0,W,H);
+  stars.slice().sort((a,b)=>a.z-b.z).forEach(s=>{
+    s.x+=s.vx;s.y+=s.vy;
+    if(s.x<-20)s.x=W+20;if(s.x>W+20)s.x=-20;
+    if(s.y<-20)s.y=H+20;if(s.y>H+20)s.y=-20;
+    s.alpha+=s.dAlpha;
+    if(s.alpha>=0.88){s.alpha=0.88;s.dAlpha=-Math.abs(s.dAlpha);}
+    if(s.alpha<=0.04){s.alpha=0.04;s.dAlpha=Math.abs(s.dAlpha);}
+    drawStar(s.x,s.y,Math.log(1+s.alpha*3)/Math.log(4),s.z,s.violet);
+  });
+  requestAnimationFrame(drawStars);
+}
+resize();spawnStars();drawStars();
+window.addEventListener('resize',()=>{resize();spawnStars();});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{resize();spawnStars();});
+
+document.addEventListener('touchmove',e=>{
+  if(e.target.closest('.months-scroll, .days-scroll')){ } else { e.preventDefault(); }
+},{passive:false});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+
+/* ── CONFIGURAZIONE TEMPORALE AUTOMATICA REALE ── */
+const START = new Date(2025, 3, 10); // Aprile 2025 (Inizio relazione)
+const TODAY = new Date();            // Legge l'orologio reale del dispositivo
+
+function monthsBetween(a, b) {
+  return (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+}
+const CURRENT_MONTH_IDX = monthsBetween(START, TODAY);
+const TOTAL_SHOWN = CURRENT_MONTH_IDX + 6; // Mostra fino a 6 mesi nel futuro (bloccati)
+
+const MONTH_NAMES_IT=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno',
+  'Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+const WEEK_NAMES_IT=["dom","lun","mar","mer","gio","ven","sab"];
+
+/* ── ARCHIVIO LOCALSTORAGE RICORDI E IMMAGINI REALTIME ── */
+let USER_PHOTOS = {};
+try {
+  const saved = localStorage.getItem('noi_memories_photos');
+  if(saved) USER_PHOTOS = JSON.parse(saved);
+} catch(e) { console.error("Impossibile caricare le foto salvate", e); }
+
+// Stato globale per tracciare la polaroid correntemente aperta
+let activeDayContext = null;
+
+function getMonthData(idx){
+  const d = new Date(START.getFullYear(), START.getMonth() + idx, 1);
+  const name = MONTH_NAMES_IT[d.getMonth()];
+  const year = d.getFullYear();
+  const daysInMonth = new Date(year, d.getMonth() + 1, 0).getDate();
+  const firstDay = new Date(year, d.getMonth(), 1);
+  const lastDay = new Date(year, d.getMonth(), daysInMonth);
+  return { idx, name, year, month: d.getMonth(), daysInMonth, firstDay, lastDay, date: d };
 }
 
-// ── LISTEN PEERS ──
-function listenPeers() {
-  if (state.unsubscribe) return;
-  const roomRef = ref(db, `rooms/${state.room}/users`);
-  state.unsubscribe = onValue(roomRef, snapshot => {
-    const data = snapshot.val() || {};
-    state.peers = {};
-    const now = Date.now();
-    Object.entries(data).forEach(([id, u]) => {
-      if (id === state.myId) return;
-      if (now - u.ts > 30000) return;
-      state.peers[id] = u;
-    });
-    renderFriendsList();
+function monthProgress(idx){
+  if(idx < CURRENT_MONTH_IDX) return 1;
+  if(idx > CURRENT_MONTH_IDX) return 0;
+  return Math.min(1, Math.max(0, (TODAY.getDate() - 1) / (new Date(TODAY.getFullYear(), TODAY.getMonth() + 1, 0).getDate() - 1)));
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    if(s.id.replace('screen-','')===id){ s.classList.remove('hidden'); } 
+    else { s.classList.add('hidden'); }
   });
 }
 
-// ── SHARE ──
-window.shareRoom = function() {
-  const roomId = document.getElementById('room-id').value.trim() || 'default';
-  state.room = roomId;
-  const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(roomId)}`;
-  document.getElementById('room-link-txt').textContent = url;
-  document.getElementById('room-link-box').style.display = 'flex';
-  if (navigator.share) navigator.share({ title: 'Radar 115', url }).catch(()=>{});
-};
+/* ── HOME ── */
+document.getElementById('home-date').textContent=
+  `♥ mese ${CURRENT_MONTH_IDX+1} insieme · ${TODAY.toLocaleDateString('it-IT',{day:'numeric',month:'long',year:'numeric'})}`;
 
-window.copyRoomLink = function() {
-  const url = document.getElementById('room-link-txt').textContent;
-  navigator.clipboard.writeText(url).then(showCopied).catch(() => {
-    const ta = document.createElement('textarea');
-    ta.value = url; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    showCopied();
-  });
-};
-
-window.updateRange = function(val) {
-  state.range = parseInt(val);
-  document.getElementById('range-val').textContent   = formatDist(state.range);
-  document.getElementById('range-label').textContent = formatDist(state.range);
-};
-
-// ── SMOOTH HEADING ──
-// Interpolazione angolare che non salta da 359→0
-function lerpAngle(current, target, t) {
-  let diff = ((target - current + 540) % 360) - 180;
-  return (current + diff * t + 360) % 360;
-}
-
-// ── DRAW ──
-function drawRadar() {
-  ctx.clearRect(0, 0, W, H);
-
-  // Smooth heading — solo in modalità AUTO
-  if (state.orientMode === 'auto' && state.compassActive && state.heading !== null) {
-    state.headingSmooth = lerpAngle(state.headingSmooth, state.heading, 0.1);
-  } else if (state.orientMode === 'north') {
-    // In NORD FISSO: riporta gradualmente a 0 se si cambia modalità
-    state.headingSmooth = lerpAngle(state.headingSmooth, 0, 0.15);
-  }
-
-  // In AUTO il radar ruota; in NORD FISSO hdgRad=0 (nord sempre in cima)
-  const hdgRad = (state.orientMode === 'auto' && state.compassActive)
-    ? -(state.headingSmooth * Math.PI / 180)
-    : 0;
-
-  // BG circle
-  ctx.save(); ctx.beginPath(); ctx.arc(CX,CY,R+14,0,Math.PI*2); ctx.clip();
-  ctx.fillStyle = '#010901'; ctx.fillRect(0,0,W,H); ctx.restore();
-
-  // ── Tutto il contenuto del radar ruota secondo heading ──
-  ctx.save();
-  ctx.translate(CX, CY);
-  ctx.rotate(hdgRad);
-  ctx.translate(-CX, -CY);
-
-  // Rings
-  ctx.strokeStyle = '#002208'; ctx.lineWidth = 2;
-  [0.25,0.5,0.75,1].forEach(f => { ctx.beginPath(); ctx.arc(CX,CY,R*f,0,Math.PI*2); ctx.stroke(); });
-
-  // Crosshair
-  ctx.strokeStyle = '#002208'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(CX-R,CY); ctx.lineTo(CX+R,CY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(CX,CY-R); ctx.lineTo(CX,CY+R); ctx.stroke();
-
-  // Cardinals (ruotano con il radar = sono punti cardinali veri)
-  ctx.font='bold 24px Orbitron, monospace'; ctx.fillStyle='#00aa2a';
-  ctx.textAlign='center';
-
-  // N in rosso per distinguerlo
-  ctx.fillStyle='#ff4444'; ctx.shadowBlur=8; ctx.shadowColor='#ff4444';
-  ctx.fillText('N', CX, CY-R+30);
-  ctx.shadowBlur=0;
-
-  ctx.fillStyle='#00aa2a';
-  ctx.fillText('S', CX, CY+R-12);
-  ctx.textAlign='left';  ctx.fillText('E', CX+R-30, CY+9);
-  ctx.textAlign='right'; ctx.fillText('W', CX-R+30, CY+9);
-
-  // Sweep
-  if (state.running) {
-    for (let i = 0; i < 32; i++) {
-      const a = state.scanAngle - (Math.PI*0.65*i/32);
-      ctx.save(); ctx.beginPath(); ctx.moveTo(CX,CY);
-      ctx.arc(CX,CY,R,a,a+Math.PI*0.65/32);
-      ctx.lineTo(CX,CY); ctx.fillStyle=`rgba(0,255,65,${0.13*(1-i/32)})`; ctx.fill(); ctx.restore();
-    }
-    ctx.save(); ctx.strokeStyle='#00ff41'; ctx.lineWidth=2.5; ctx.shadowBlur=14; ctx.shadowColor='#00ff41';
-    ctx.beginPath(); ctx.moveTo(CX,CY);
-    ctx.lineTo(CX+Math.cos(state.scanAngle)*R, CY+Math.sin(state.scanAngle)*R);
-    ctx.stroke(); ctx.restore();
-  }
-
-  // Outer border
-  ctx.save(); ctx.strokeStyle='#00ff41'; ctx.lineWidth=3; ctx.shadowBlur=22; ctx.shadowColor='#00ff41';
-  ctx.beginPath(); ctx.arc(CX,CY,R,0,Math.PI*2); ctx.stroke(); ctx.restore();
-
-  // Clip circle for dots
-  ctx.save(); ctx.beginPath(); ctx.arc(CX,CY,R-2,0,Math.PI*2); ctx.clip();
-
-  // Peers
-  Object.values(state.peers).forEach(p => {
-    if (!state.myPos) return;
-    const {x,y} = latLonToXY(p.lat, p.lon);
-    const dist  = haversine(state.myPos.lat, state.myPos.lon, p.lat, p.lon);
-    const col   = p.color || '#00cfff';
-    const inRange = dist <= state.range;
-
-    ctx.save();
-    ctx.globalAlpha = inRange ? 1 : 0.3;
-    ctx.shadowBlur  = 24; ctx.shadowColor = col;
-    ctx.beginPath(); ctx.arc(x,y,14,0,Math.PI*2);
-    ctx.fillStyle = col; ctx.fill();
-    ctx.restore();
-
-    if (inRange) {
-      const ph = (state.scanAngle/(Math.PI*2))%1;
-      ctx.save(); ctx.globalAlpha = 1-ph;
-      ctx.beginPath(); ctx.arc(x,y,14+24*ph,0,Math.PI*2);
-      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
-    }
-
-    // Nome e distanza — contro-ruotati per restare leggibili
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(-hdgRad);   // contro-rotazione: il testo resta sempre dritto
-    ctx.globalAlpha = inRange ? 1 : 0.4;
-    ctx.font        = 'bold 26px Share Tech Mono, monospace';
-    ctx.fillStyle   = col; ctx.shadowBlur = 10; ctx.shadowColor = col;
-    ctx.textAlign   = 'center';
-    ctx.fillText(p.name, 0, -22);
-    ctx.font = '20px Share Tech Mono, monospace';
-    ctx.globalAlpha *= 0.75;
-    ctx.fillText(formatDist(dist), 0, 34);
-    ctx.restore();
-  });
-
-  // ME — sempre al centro, disegnato DOPO i peer (sopra a tutto)
-  const meCol = state.myColor;
-
-  // Sfondo nero sotto per staccarsi dai peer sovrapposti
-  ctx.save();
-  ctx.beginPath(); ctx.arc(CX,CY,22,0,Math.PI*2);
-  ctx.fillStyle='rgba(0,0,0,0.85)'; ctx.fill();
-  ctx.restore();
-
-  // Dot colorato
-  ctx.save();
-  ctx.shadowBlur=28; ctx.shadowColor=meCol;
-  ctx.beginPath(); ctx.arc(CX,CY,18,0,Math.PI*2);
-  ctx.fillStyle=meCol; ctx.fill();
-  ctx.restore();
-
-  // Anello bianco fisso — identifica sempre il TUO punto
-  ctx.save();
-  ctx.beginPath(); ctx.arc(CX,CY,22,0,Math.PI*2);
-  ctx.strokeStyle='rgba(255,255,255,0.9)'; ctx.lineWidth=2.5; ctx.stroke();
-  ctx.restore();
-
-  // Anello colorato esterno
-  ctx.save();
-  ctx.beginPath(); ctx.arc(CX,CY,28,0,Math.PI*2);
-  const r2=parseInt(meCol.slice(1,3),16), g2=parseInt(meCol.slice(3,5),16), b2=parseInt(meCol.slice(5,7),16);
-  ctx.strokeStyle=`rgba(${r2},${g2},${b2},0.35)`; ctx.lineWidth=2; ctx.stroke();
-  ctx.restore();
-
-  // Nome ME contro-ruotato
-  ctx.save();
-  ctx.translate(CX, CY);
-  ctx.rotate(-hdgRad);
-  ctx.font='bold 28px Share Tech Mono, monospace'; ctx.fillStyle=meCol;
-  ctx.shadowBlur=12; ctx.shadowColor=meCol; ctx.textAlign='center';
-  ctx.fillText(state.myName, 0, -28);
-  ctx.restore();
-
-  ctx.restore(); // unclip
-
-  ctx.restore(); // unrotate
-
-  // Corners (fuori dalla rotazione — statici)
-  drawCorners();
-
-  // Mirino fisso al centro (non ruota)
-  ctx.save();
-  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(CX-12,CY); ctx.lineTo(CX+12,CY); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(CX,CY-12); ctx.lineTo(CX,CY+12); ctx.stroke();
-  ctx.restore();
-}
-
-function drawCorners() {
-  const s=40; ctx.strokeStyle='#00ff41'; ctx.lineWidth=4;
-  ctx.beginPath(); ctx.moveTo(16,16+s); ctx.lineTo(16,16); ctx.lineTo(16+s,16); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W-16-s,16); ctx.lineTo(W-16,16); ctx.lineTo(W-16,16+s); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(16,H-16-s); ctx.lineTo(16,H-16); ctx.lineTo(16+s,H-16); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(W-16-s,H-16); ctx.lineTo(W-16,H-16); ctx.lineTo(W-16,H-16-s); ctx.stroke();
-}
-
-// ── ANIMATE ──
-function animate() {
-  if (state.running) state.scanAngle = (state.scanAngle+0.025)%(Math.PI*2);
-  drawRadar();
-  updateNorthArrow();
-  state.animId = requestAnimationFrame(animate);
-}
-
-function updateNorthArrow() {
-  if (state.orientMode !== 'auto') return;
-  const arrow = document.getElementById('north-arrow');
-  if (!arrow || arrow.style.display === 'none') return;
-  const wrap = document.querySelector('.radar-wrap');
-  const size = wrap ? wrap.offsetWidth : 380;
-  const cx = size / 2;
-  const edgeR = size / 2 - 12;
-  const northRad = state.headingSmooth * Math.PI / 180;
-  // nord è nella direzione opposta alla rotazione del radar
-  const nx = cx + Math.sin(northRad) * edgeR;
-  const ny = cx - Math.cos(northRad) * edgeR;
-  const rot = state.headingSmooth + 180;
-  arrow.style.left      = (nx - 7) + 'px';
-  arrow.style.top       = (ny - 8) + 'px';
-  arrow.style.transform = `rotate(${rot}deg)`;
-}
-
-// ── FRIENDS LIST ──
-function renderFriendsList() {
-  const el = document.getElementById('friends-list');
-  const peers = Object.values(state.peers);
-  if (!peers.length) {
-    el.innerHTML = '<div style="font-size:0.7rem;color:var(--green-dim);text-align:center;padding:10px">Nessun segnale</div>';
-    return;
-  }
-  el.innerHTML = peers.map(p => {
-    const dist = state.myPos ? haversine(state.myPos.lat,state.myPos.lon,p.lat,p.lon) : null;
-    const col  = p.color || '#00cfff';
-    return `<div class="friend-item">
-      <div class="friend-dot" style="background:${col};box-shadow:0 0 8px ${col}"></div>
-      <span class="friend-name" style="color:${col}">${p.name}</span>
-      <span class="friend-dist">${dist!==null ? formatDist(dist) : '?'}</span>
-    </div>`;
-  }).join('');
-}
-
-// ── GEO MATH ──
-function haversine(lat1,lon1,lat2,lon2) {
-  const R=6371000, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
-  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-function latLonToXY(lat,lon) {
-  if (!state.myPos) return {x:CX,y:CY};
-  const dy_m = -(lat-state.myPos.lat)*111320;
-  const dx_m  = (lon-state.myPos.lon)*111320*Math.cos(state.myPos.lat*Math.PI/180);
-  const scale = R/state.range;
-  return { x: Math.round(CX+dx_m*scale), y: Math.round(CY+dy_m*scale) };
-}
-
-function formatDist(m) { return m>=1000?(m/1000).toFixed(1)+' km':Math.round(m)+' m'; }
-function setLog(msg)    { document.getElementById('log').textContent = msg; }
-function showCopied()   { const e=document.getElementById('copied-flash'); e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),1200); }
-
-window.addEventListener('beforeunload', () => {
-  if (state.peerRef) try { remove(state.peerRef); } catch(e){}
+document.getElementById('btn-enter').addEventListener('click',()=>{
+  buildMonths();
+  showScreen('months');
 });
 
-init();
+/* ── CAROSELLO MAGNETICO MESI DIZIONARIO ── */
+function updateCardSizes() {
+  const container = document.getElementById('months-scroll');
+  const cards = container.querySelectorAll('.month-card');
+  const containerCenter = container.scrollLeft + (container.offsetWidth / 2);
+
+  cards.forEach(card => {
+    const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+    const distance = Math.abs(containerCenter - cardCenter);
+    if (distance < 130) {
+      card.classList.add('active-center');
+    } else {
+      card.classList.remove('active-center');
+    }
+  });
+}
+
+function buildMonths(){
+  const container=document.getElementById('months-scroll');
+  container.innerHTML='';
+  
+  for(let i=0; i<TOTAL_SHOWN; i++){
+    const md=getMonthData(i);
+    const isCurrent = i === CURRENT_MONTH_IDX;
+    const isPast = i < CURRENT_MONTH_IDX;
+    const isLocked = i > CURRENT_MONTH_IDX;
+
+    const card=document.createElement('div');
+    card.className = isLocked ? 'month-card future-locked' : 'month-card';
+
+    const prog=monthProgress(i);
+    const badge = isCurrent ? 'current' : (isPast ? 'done' : 'future');
+    const badgeLabel = isCurrent ? 'In corso ✦' : (isPast ? 'Vissuto ♥' : 'Bloccato 🔒');
+    const hearts=['♥','♡','✦','☽','✿','⊹','◦','✧'];
+    const heart=hearts[i%hearts.length];
+
+    const fmt=d=>d.toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+    const dateRange=`${fmt(md.firstDay)} — ${fmt(md.lastDay)}`;
+
+    card.innerHTML=`
+      <div class="mc-row">
+        <div class="mc-left">
+          <span class="mc-num">Mese ${i+1} · ${md.year}</span>
+          <span class="mc-name">${md.name}</span>
+          <span class="mc-dates">${dateRange}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          ${isLocked ? `<span class="mc-lock">🔒</span>` : `<span class="mc-heart">${heart}</span>`}
+          <span class="mc-badge ${badge}">${badgeLabel}</span>
+        </div>
+      </div>
+      ${!isLocked ? `<div class="mc-progress"><div class="mc-progress-fill" style="width:${(prog*100).toFixed(0)}%"></div></div>` : ''}
+    `;
+
+    if(!isLocked){
+      // Apertura immediata ed intuitiva sul mese cliccato
+      card.addEventListener('click',()=> {
+        openMonth(i);
+      });
+    }
+    container.appendChild(card);
+  }
+  
+  container.removeEventListener('scroll', updateCardSizes);
+  container.addEventListener('scroll', updateCardSizes);
+
+  setTimeout(() => {
+    const cards = container.querySelectorAll('.month-card');
+    const targetIdx = CURRENT_MONTH_IDX < TOTAL_SHOWN ? CURRENT_MONTH_IDX : 0;
+    if(cards[targetIdx]) {
+      cards[targetIdx].scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+    }
+    updateCardSizes();
+  }, 50);
+}
+document.getElementById('back-months').addEventListener('click',()=>showScreen('home'));
+
+/* ── DETTAGLIO GIORNI (TUTTI ACCESSIBILI SE PASSATI/CORRENTI) ── */
+function openMonth(idx){
+  const md=getMonthData(idx);
+  document.getElementById('detail-title').textContent=`${md.name} ${md.year}`;
+  document.getElementById('detail-sub').textContent=`Mese ${idx+1} · Album di Coppia`;
+  buildDays(md, idx);
+  showScreen('detail');
+}
+
+function buildDays(md, monthIdx){
+  const grid=document.getElementById('days-grid');
+  grid.innerHTML='';
+
+  for(let d=1; d<=md.daysInMonth; d++){
+    const cellDate = new Date(md.year, md.month, d);
+    const isDayInFuture = cellDate > TODAY;
+
+    // Generiamo l'identificatore univoco del giorno (es: "2026-3-18")
+    const dayKey = `${md.year}-${md.month}-${d}`;
+    const savedPhoto = USER_PHOTOS[dayKey];
+    
+    // Calcoliamo il giorno della settimana corretto
+    const dayOfWeekStr = WEEK_NAMES_IT[cellDate.getDay()];
+
+    const card = document.createElement('div');
+    card.style.animationDelay = `${(d-1)*0.012}s`;
+
+    if (isDayInFuture) {
+      // GIORNO FUTURO: Congelato fino al suo arrivo reale
+      card.className = 'day-card day-future-locked fadein';
+      card.innerHTML = `
+        <div class="day-photo"><div class="day-photo-inner"></div></div>
+        <div class="day-footer">
+          <span class="day-num">${d}</span>
+          <span class="day-label">FUTURO</span>
+        </div>
+      `;
+    } else {
+      // GIORNO PASSATO O CORRENTE SBLOCCATO: Sempre cliccabile per inserire/vedere la polaroid
+      const hasPhotoClass = savedPhoto ? 'day-card has-uploaded-photo fadein' : 'day-card fadein';
+      card.className = hasPhotoClass;
+      
+      card.innerHTML = `
+        <div class="day-photo">
+          <div class="day-photo-inner" style="${savedPhoto ? `background-image:url(${savedPhoto});` : ''}"></div>
+        </div>
+        <div class="day-footer">
+          <span class="day-num">${d}</span>
+          <span class="day-label">${dayOfWeekStr}</span>
+        </div>
+      `;
+      card.addEventListener('click',()=>openPolaroid(md, d, dayOfWeekStr, dayKey));
+    }
+    grid.appendChild(card);
+  }
+}
+document.getElementById('back-detail').addEventListener('click',()=>showScreen('months'));
+
+/* ── DETTAGLIO POLAROID CON ROTAZIONE ED UPLOAD IMMAGINI ── */
+const bigPol=document.getElementById('big-polaroid');
+let polAngleY=0, polAngVelY=0, polGrabbed=false, polLastX=0, polRaf=null;
+const DAMP=0.90, MAX_VEL=25, SPRING=0.05, SPRING_TH=0.05;
+
+function applyPol3D(){
+  bigPol.style.transform = `rotateY(${polAngleY}deg)`;
+  const lightDeg = 120 + (polAngleY * 0.8);
+  bigPol.style.setProperty('--light-deg', `${lightDeg}deg`);
+}
+
+function polPhysics3D(){
+  if(!polGrabbed){
+    const rest=0, delta=rest-polAngleY;
+    if(Math.abs(delta)<SPRING_TH && Math.abs(polAngVelY)<SPRING_TH){
+      polAngleY=rest; polAngVelY=0; applyPol3D(); polRaf=null; return;
+    }
+    polAngVelY += delta * SPRING;
+    polAngVelY *= DAMP;
+  }
+  polAngleY += polAngVelY;
+  polAngleY = Math.max(-65, Math.min(65, polAngleY));
+  applyPol3D();
+  polRaf=requestAnimationFrame(polPhysics3D);
+}
+
+function startPolPhysics(){if(!polRaf) polRaf=requestAnimationFrame(polPhysics3D);}
+
+function openPolaroid(md, day, weekday, dayKey){
+  activeDayContext = { md, day, weekday, dayKey };
+
+  let fullWeekday = weekday.toUpperCase();
+  if(fullWeekday === "SAB") fullWeekday = "SABATO";
+  if(fullWeekday === "LUN") fullWeekday = "LUNEDÌ";
+  if(fullWeekday === "DOM") fullWeekday = "DOMENICA";
+  if(fullWeekday === "MAR") fullWeekday = "MARTEDÌ";
+  if(fullWeekday === "MER") fullWeekday = "MERCOLEDÌ";
+  if(fullWeekday === "GIO") fullWeekday = "GIOVEDÌ";
+  if(fullWeekday === "VEN") fullWeekday = "VENERDÌ";
+
+  document.getElementById('pol-daytitle').textContent=`${day} ${md.name} ${md.year}`;
+  document.getElementById('big-caption').textContent=`${fullWeekday} ${day} ${md.name.toLowerCase()}`;
+  
+  // Renderizzazione foto se precedentemente memorizzata
+  const targetPhotoContainer = document.getElementById('big-photo');
+  if(USER_PHOTOS[dayKey]) {
+    targetPhotoContainer.style.backgroundImage = `url(${USER_PHOTOS[dayKey]})`;
+    document.getElementById('btn-trigger-upload').textContent = "Modifica Foto ♥";
+  } else {
+    targetPhotoContainer.style.backgroundImage = 'none';
+    document.getElementById('btn-trigger-upload').textContent = "Aggiungi Foto ♥";
+  }
+
+  polAngleY=0;
+  polAngVelY=0;
+  applyPol3D();
+  showScreen('polaroid');
+}
+
+// Chiusura schermata e refresh immediato della griglia per mostrare l'anteprima inserita
+document.getElementById('btn-close-pol').addEventListener('click',()=>{
+  if(activeDayContext) {
+    openMonth(activeDayContext.md.idx);
+  }
+  showScreen('detail');
+});
+
+/* ── LOGICA COMPRESSIONE E SALVATAGGIO FOTO REALTIME ── */
+const fileInput = document.getElementById('secure-photo-input');
+document.getElementById('btn-trigger-upload').addEventListener('click', () => {
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file || !activeDayContext) return;
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      // Ottimizzazione automatica dell'immagine per non saturare la memoria del browser (LocalStorage)
+      const canvasOp = document.createElement('canvas');
+      const MAX_WIDTH = 750;
+      const scale = MAX_WIDTH / img.width;
+      
+      if(img.width > MAX_WIDTH) {
+        canvasOp.width = MAX_WIDTH;
+        canvasOp.height = img.height * scale;
+      } else {
+        canvasOp.width = img.width;
+        canvasOp.height = img.height;
+      }
+
+      const ctxOp = canvasOp.getContext('2d');
+      ctxOp.drawImage(img, 0, 0, canvasOp.width, canvasOp.height);
+      
+      // Convertiamo in JPEG compresso (qualità 0.72)
+      const optimizedBase64 = canvasOp.toDataURL('image/jpeg', 0.72);
+      
+      // Salvataggio nel database locale ed aggiornamento UI real-time
+      USER_PHOTOS[activeDayContext.dayKey] = optimizedBase64;
+      localStorage.setItem('noi_memories_photos', JSON.stringify(USER_PHOTOS));
+      
+      document.getElementById('big-photo').style.backgroundImage = `url(${optimizedBase64})`;
+      document.getElementById('btn-trigger-upload').textContent = "Modifica Foto ♥";
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+/* CONTROLLI DI TRASCINAMENTO MOUSE / TOUCH PER ROTAZIONE POLAROID */
+bigPol.addEventListener('mousedown',e=>{
+  polGrabbed=true; bigPol.classList.add('grabbed');
+  polLastX=e.clientX; polAngVelY=0; e.preventDefault();
+});
+window.addEventListener('mousemove',e=>{
+  if(!polGrabbed)return;
+  const dx=e.clientX-polLastX, sensitivity=0.35;
+  polAngleY += dx * sensitivity;
+  polAngVelY = dx * sensitivity * 0.4;
+  polLastX=e.clientX;
+  applyPol3D();
+});
+window.addEventListener('mouseup',()=>{
+  if(!polGrabbed)return; polGrabbed=false; bigPol.classList.remove('grabbed');
+  polAngVelY=Math.max(-MAX_VEL, Math.min(MAX_VEL, polAngVelY)); startPolPhysics();
+});
+
+bigPol.addEventListener('touchstart',e=>{
+  polGrabbed=true; bigPol.classList.add('grabbed');
+  polLastX=e.touches[0].clientX; polAngVelY=0;
+  e.stopPropagation();
+},{passive:true});
+window.addEventListener('touchmove',e=>{
+  if(!polGrabbed)return;
+  const dx=e.touches[0].clientX-polLastX, sensitivity=0.35;
+  polAngleY += dx * sensitivity;
+  polAngVelY = dx * sensitivity * 0.4;
+  polLastX=e.touches[0].clientX;
+  applyPol3D();
+},{passive:true});
+window.addEventListener('touchend',()=>{
+  if(!polGrabbed)return; polGrabbed=false; bigPol.classList.remove('grabbed');
+  polAngVelY=Math.max(-MAX_VEL, Math.min(MAX_VEL, polAngVelY)); startPolPhysics();
+});
+
+/* FULLSCREEN UTILS */
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=navigator.standalone===true
+  ||window.matchMedia('(display-mode:fullscreen)').matches
+  ||window.matchMedia('(display-mode:standalone)').matches;
+
+function goFS(){
+  const el=document.documentElement;
+  const req=el.requestFullscreen||el.webkitRequestFullscreen||el.mozRequestFullScreen||el.msRequestFullscreen;
+  if(req&&!document.fullscreenElement)req.call(el).catch(()=>{});
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isIOS&&!isStandalone)goFS();});
+
+if(isIOS&&!isStandalone){
+  const b=document.createElement('div');b.id='ios-banner';
+  b.innerHTML=`<span>Fullscreen: <strong>Condividi</strong> → <strong>Aggiungi a schermata Home</strong></span><button onclick="this.parentElement.remove()">✕</button>`;
+  document.body.appendChild(b);setTimeout(()=>b?.remove(),8000);
+}else if(!isStandalone){
+  document.addEventListener('click',goFS,{once:true});
+  document.addEventListener('touchstart',goFS,{once:true,passive:true});
+}
 </script>
 </body>
 </html>
